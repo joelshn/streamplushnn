@@ -71,7 +71,7 @@ def show_email():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Correo Más Reciente</title>
+        <title>Correo</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 20px; }}
             .email-header {{ margin-bottom: 20px; }}
