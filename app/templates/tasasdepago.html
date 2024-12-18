@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasas de Pago</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+    <h1>Tasas de Pago por cada 50 ventas</h1>
+    <br>
+    <table>
+        <thead>
+            <tr>
+                <th>Cuenta</th>
+                <th>Ganancia Lps</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Netflix</td>
+                <td>1,125</td>
+            </tr>
+            <tr>
+                <td>YouTube Premium</td>
+                <td>1,125</td>
+            </tr>
+            <tr>
+                <td>Primevideo</td>
+                <td>875</td>
+            </tr>
+            <tr>
+                <td>Spotify</td>
+                <td>750</td>
+            </tr>
+            <tr>
+                <td>Paramount+</td>
+                <td>750</td>
+            </tr>
+            <tr>
+                <td>Disney+</td>
+                <td>660</td>
+            </tr>
+            <tr>
+                <td>Max</td>
+                <td>660</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <a class="btn btn-primary" href="{{ url_for('streamplus') }}">Volver</a>
+    {% endblock %}
+</body>
+</html>

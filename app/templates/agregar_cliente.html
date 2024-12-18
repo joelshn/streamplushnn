@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+    <h1>Registrar Cliente</h1>
+    <form method="POST">
+        <label>ID: {{ next_id }}</label><br>
+        <label>Nombre:</label>
+        <input type="text" name="nombre" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+ [A-Za-zÀ-ÖØ-öø-ÿ]+$" title="Debe incluir nombre y apellido" placeholder="Juan Pérez" required><br>
+        <label>Número:</label>
+        <input type="text" name="numero" pattern="\d{8}" maxlength="8" title="El numero debe contener 8 dígitos" placeholder="97302756" required><br>
+        <button type="submit">Guardar</button>
+    </form>
+    <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+    <a class="btn btn-primary" href="{{ url_for('streamplus') }}">Volver</a>
+    {% endblock %}
+</body>
+</html>

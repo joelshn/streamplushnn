@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StreamPlus{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <style>
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            position: relative;
+            margin: 0 1em;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #444;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 200px;
+            z-index: 1000;
+        }
+
+        nav ul li ul li {
+            width: 100%;
+        }
+
+        nav ul li ul li a {
+            display: block;
+            padding: 10px;
+            color: #fff;
+        }
+
+        nav ul li ul li a:hover {
+            background-color: #555;
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+        }
+
+        nav ul li {
+            margin: 0.5em 0;
+        }
+    </style>
+    <style>
+        .products-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.product-card {
+    background-color: #1c1c1c;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    scroll-snap-type: x mandatory;
+}
+
+.carousel-item {
+    scroll-snap-align: start;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    flex: 0 0 auto;
+    width: 250px;
+    text-align: center;
+}
+
+.carousel-item img {
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-add-to-cart {
+    background-color: #ff9900;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.btn-add-to-cart:hover {
+    background-color: #ff7700;
+}
+
+.cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.cart-button {
+    background-color: #444;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.cart-button:hover {
+    background-color: #555;
+}
+
+#cart-modal {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+#cart-modal.hidden {
+    display: none;
+}
+
+#cart-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#cart-list li {
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+        </style>
+        
+        <script>
+        let cart = [];
+        
+        function addToCart(item, price) {
+            cart.push({ item, price });
+            updateCart();
+        }
+        
+        function updateCart() {
+            document.getElementById('cart-count').textContent = cart.length;
+        
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = '';
+        
+            cart.forEach((cartItem, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${cartItem.item} - L.${cartItem.price}`;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '❌';
+                removeBtn.onclick = () => removeFromCart(index);
+                li.appendChild(removeBtn);
+                cartList.appendChild(li);
+            });
+        
+            document.getElementById('pay-button').disabled = cart.length === 0;
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+        
+        function toggleCart() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.classList.toggle('hidden');
+        }
+        
+        function goToPay() {
+            alert('Procesando el pago...');
+            // Aquí puedes redirigir al sistema de pago o enviar los datos al servidor
+            console.log(cart);
+        }
+        </script>
+        
+</head>
+<body>
+    <header>
+        <h1>
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieGkUeZGUtcHFXvXvldzZrOPIXRhEQfH_OdthzY8ypt5-Vt7IAnlTmpSNGg9WZpf3fjfuNMveyAm5NSdvU2ipa1ggFN4ePPXr7GjtP8ZwtaP3VUBgp0ld-InUodUAXwV3CjBx5XLWW4gcosuKhjz2co0Z-2yiJVg7gi5nIELP6jha0O-kJ2LU9hN0ksiI/s1600/s.png" alt="StreamPlus" class="logo" height="140" width="140">
+            <div></div>
+            StreamPlus
+        </h1>
+        <nav>
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li>
+                    <a href="#">Menu</a>
+                    <ul class="submenu">
+                        <li><a href="/">Cuentas</a></li>
+                        <li><a href="/combos">Combos</a></li>
+                        <li><a href="/metodos_pago">Métodos de Pago</a></li>
+                    </ul>
+                </li>
+                <li><a href="https://Wa.me/50497302756">Contacto</a></li>
+                <li><a href="/streamplus">Vender</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+
+    <footer>
+        <p>&copy; 2024 StreamPlus</p>
+    </footer>
+</body>
+</html>

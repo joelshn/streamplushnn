@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+    <div class="header">
+        <h1>Clientes</h1>
+    </div>
+    <div class="container">
+    <form method="POST">
+        <input type="text" name="search" placeholder="Buscar...">
+        <button type="submit">Buscar</button>
+    </form>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Número</th>
+            <th>Accion</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}
+        <tr>
+            <td data-label="ID">{{ cliente[0] }}</td>
+            <td data-label="Nombre">{{ cliente[1] }}</td>
+            <td data-label="Telefono">{{ cliente[2] }}</td>
+            <td data-label="Accion"><a href="https://wa.me/504{{ cliente[2] }}?text=Hola%20{{ cliente[1] }},%20le%20saludamos%20de%20StreamPlus%20y%20queremos%20confirmar%20si%20desea%20renovar%20su%20suscripción%20al%20servicio.%20Quedamos%20atentos%20a%20su%20respuesta.%20Gracias%20por%20su%20preferencia." target="_blank">Contactar</a></td>
+        </tr>
+        {% endfor %}
+        <tbody>
+    </table>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+    <a href="{{ url_for('admin') }}">Volver</a>
+    </div>
+    {% endblock %}
+</body>
+</html>

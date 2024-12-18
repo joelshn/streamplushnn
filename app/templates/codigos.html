@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Códigos de Netflix y Disney+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Ver Códigos de Netflix y Disney+</h1>
+    <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+
+    {% if not cliente %}
+        <form method="post" action="/codigos">
+            <label for="id">ID de Cliente:</label>
+            <input type="text" name="id" id="id" placeholder="Ingresa tu ID" required>
+            <label for="telefono">Número de Teléfono:</label>
+            <input type="text" name="telefono" id="telefono" placeholder="97302756" required>
+            <button type="submit">Ingresar</button>
+        </form>
+    {% endif %}
+</body>
+</html>

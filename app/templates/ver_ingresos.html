@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Ingresos - StreamPlus</title>
+    <!-- Agregar Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .header {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .content h1 {
+            color: #343a40;
+        }
+        .income-details {
+            margin-top: 20px;
+        }
+        .income-details p {
+            font-size: 1.2rem;
+            color: #495057;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>StreamPlus - Ver Ingresos</h1>
+        </div>
+
+        <div class="content">
+            <h1>Ingresos</h1>
+            <div class="income-details">
+                <h2>Ventas de STREAMPLUS:</h2>
+                <p><strong>Mensual:</strong> {{ ventas_streamplus_mensual }} L</p>
+                <p><strong>Anual:</strong> {{ ventas_streamplus_anual }} L</p>
+                <h2>Referidos:</h2>
+                {% for referido in referidos_mensuales %}
+                    <p><strong>{{ referido[0] }}:</strong> {{ referido[1] }} L</p>
+                {% endfor %}
+
+                <h2>Anual</h2>
+                {% for referido in referidos_anuales %}
+                    <p><strong>{{ referido[0] }}:</strong> {{ referido[1] }} L</p>
+                {% endfor %}
+                
+                 <h2>Total Ganado:</h2>
+                <p><strong>Mensual:</strong> {{ ingresos_mensuales }} L</p>
+                <p><strong>Anual:</strong> {{ ingresos_anuales }} L</p>
+            </div>
+        </div>
+        <br>
+         <button><a href="admin">Volver</a></button>
+
+        <div class="footer">
+            <p>&copy; 2024 StreamPlus.</p>
+        </div>
+    </div>
+
+    <!-- Agregar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Agregar Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

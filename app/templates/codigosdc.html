@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Último Correo</title>
+    </head>
+    <body>
+        <h1>Último Correo</h1>
+        {% if email_data %}
+        <div class="email-container">
+            <div class="email-header">
+                <p><strong>Remitente:</strong> {{ email_data.sender }}</p>
+                <p><strong>Asunto:</strong> {{ email_data.subject }}</p>
+                <p><strong>Fecha:</strong> {{ email_data.date }}</p>
+            </div>
+           
+                {{ email_data.body | safe }}
+            </div>
+        </div>
+        {% else %}
+        <p>No se encontró ningún correo.</p>
+        {% endif %}
+    </body>
+    </html>

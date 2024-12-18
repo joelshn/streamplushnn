@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Retiros Pendientes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Retiros Pendientes</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Monto</th>
+                <th>Metodo de Pago</th>
+                <th>Informacion de pago</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for retiro in retiros %}
+            <tr>
+                <td>{{ retiro[0] }}</td>
+                <td>{{ retiro[1] }}</td>
+                <td>{{ retiro[2] }}</td>
+                <td>{{ retiro[3] }}</td>
+                <td>{{ retiro[4] }}</td>
+                <td>{{ retiro[7] }}</td>
+                <td>{{ retiro[6] }}</td>
+                <td>
+                    <form action="{{ url_for('ver_retiros') }}" method="post">
+                        <input type="hidden" name="retiro_id" value="{{ retiro[0] }}">
+                        <button type="submit">Confirmar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('admin') }}">Volver</a>
+</body>
+</html>

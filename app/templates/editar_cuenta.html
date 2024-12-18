@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cuenta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="header">
+        <h1>Editar Cuenta</h1>
+    </div>
+    <div class="container">
+        <form method="POST">
+            <label for="tipo_cuenta">Tipo de Cuenta:</label>
+            <input type="text" id="tipo_cuenta" name="tipo_cuenta" value="{{ cuenta[1] }}" required>
+
+            <label for="correoc">Correo de la Cuenta:</label>
+            <input type="email" id="correoc" name="correoc" value="{{ cuenta[2] }}" required>
+
+            <label for="password">Contraseña:</label>
+            <input type="text" id="password" name="password" value="{{ cuenta[3] }}" required>
+
+            <label for="fechac">Fecha de Creación:</label>
+            <input type="date" id="fechac" name="fechac" value="{{ cuenta[4] }}" required>
+
+            <label for="fechav">Fecha de Vencimiento:</label>
+            <input type="date" id="fechav" name="fechav" value="{{ cuenta[5] }}" required>
+
+            <label for="perfiles">Perfiles:</label>
+            <input type="number" id="perfiles" name="perfiles" value="{{ cuenta[6] }}" required>
+
+            <label for="inversion">Inversión:</label>
+            <input type="number" step="0.01" id="inversion" name="inversion" value="{{ cuenta[7] }}" required>
+
+            <button type="submit">Actualizar</button>
+            <br>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <br>
+        </form>
+        <a href="{{ url_for('ver_cuentas') }}">Volver</a>
+    </div>
+    <div class="footer">
+        &copy; 2024 StreamPlus. Todos los derechos reservados.
+    </div>
+</body>
+</html>

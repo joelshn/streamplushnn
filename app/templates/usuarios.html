@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios Registrados</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Usuarios Registrados</h1>
+    <form method="POST">
+        <input type="text" name="search" placeholder="Buscar...">
+        <button type="submit">Buscar</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre de Usuario</th>
+                <th>Número de Teléfono</th>
+                <th>Correo Electrónico</th>
+                <th>Código Referido</th>
+                <th>Rol</th>
+                <th>Saldo</th>
+                <th>Verificado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td data-label="ID">{{ usuario[0] }}</td>
+                <td data-label="Usuario">{{ usuario[1] }}</td>
+                <td data-label="Telefono">{{ usuario[2] }}</td>
+                <td data-label="Correo">{{ usuario[3] }}</td>
+                <td data-label="Referido">{{ usuario[4] }}</td>
+                <td data-label="Rol">{{ usuario[5] }}</td>
+                <td data-label="Saldo">{{ usuario[6] }}</td>
+                <td data-label="Verificado">{{ 'Sí' if usuario[7] == 1 else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

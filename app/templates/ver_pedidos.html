@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Pedidos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Confirmar Pedidos</h1>
+    <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Tipo de Cuenta</th>
+                <th>Cuenta Disponible</th>
+                <th>Fecha Inicio</th>
+                <th>Días</th>
+                <th>Fecha Expiración</th>
+                <th>Monto</th>
+                <th>Inversión</th>
+                <th>Referido</th>
+                <th>Ganancia Ref.</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>{{ pedido[0] }}</td>
+                <td>{{ pedido[1] }}</td>
+                <td>{{ pedido[2] }}</td>
+                <td>{{ pedido[3] }}</td>
+                <td>{{ pedido[4] }}</td>
+                <td>{{ pedido[5] }}</td>
+                <td>{{ pedido[6] }}</td>
+                <td>{{ pedido[7] }}</td>
+                <td>{{ pedido[8] }}</td>
+                <td>{{ pedido[9] }}</td>
+                <td>{{ pedido[10] }}</td>
+                <td>
+                    <form action="{{ url_for('ver_pedidos') }}" method="POST">
+                        <input type="hidden" name="pedido_id" value="{{ pedido[0] }}">
+                        <button type="submit">Confirmar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+</body>
+</html>

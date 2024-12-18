@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamplus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        .header {
+            display: flex;
+            align-items: center; /* Alinea verticalmente el contenido */
+        }
+        .header img {
+            margin-right: 15px; /* Espaciado entre la imagen y el texto */
+        }
+        .header h1 {
+            margin: 0; /* Elimina margen adicional */
+            font-size: 2em;
+        }
+    </style>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #ecf0f1;
+            --accent-color: #e74c3c;
+            --text-color: #34495e;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--accent-color);
+            color: var(--secondary-color);
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        main {
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .product {
+            background-color: #463d3d;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .product:hover {
+            transform: translateY(-5px);
+        }
+        .product img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .product-info {
+            padding: 1rem;
+        }
+        .product h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        .cart {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            left: 10px;
+            background-color: #463d3d;
+            border-radius: 8px;
+            padding: 1rem;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+        .cart-items {
+            margin-bottom: 1rem;
+        }
+        .cart-item {
+            color:#fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #4d4747;
+        }
+        .cart-total {
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background-color: var(--accent-color);
+        }
+        .remove-item {
+            background-color: transparent;
+            color: var(--accent-color);
+            padding: 0;
+            font-size: 1.2rem;
+            width: auto;
+        }
+        .remove-item:hover {
+            color: var(--primary-color);
+            background-color: transparent;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            main {
+                padding: 2rem;
+            }
+            .products {
+                gap: 2rem;
+            }
+            .cart {
+                right: 20px;
+                left: auto;
+                width: 300px;
+            }
+            button {
+                width: auto;
+            }
+        }
+    </style>
+    <style>
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            position: relative;
+            margin: 0 1em;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #444;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 200px;
+            z-index: 1000;
+        }
+
+        nav ul li ul li {
+            width: 100%;
+        }
+
+        nav ul li ul li a {
+            display: block;
+            padding: 10px;
+            color: #fff;
+        }
+
+        nav ul li ul li a:hover {
+            background-color: #555;
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+        }
+
+        nav ul li {
+            margin: 0.5em 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header">
+            
+            <h1>StreamPlus</h1>
+        </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li>
+                        <a href="#">Menu</a>
+                        <ul class="submenu">
+                            <li><a href="/codigos">Codigos de acceso</a></li>
+                            <li><a href="/">Cuentas</a></li>
+                            <li><a href="/combos">Combos</a></li>
+                            <li><a href="/metodos_pago">Métodos de Pago</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="https://Wa.me/50497302756">Soporte</a></li>
+                    <li><a href="/login">Iniciar Sesion</a></li>
+                </ul>
+            </nav>
+        <div class="cart-icon" onclick="toggleCart()">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cart-count">0</span>
+        </div>
+    </header>
+    <main>
+        <section class="products">
+            <div class="product">
+                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 1">
+                <div class="product-info">
+                    <h2>Pantalla Netflix</h2>
+                    <p>1 Mes</p>
+                    <p>Precio: L 100</p>
+                    <button onclick="addToCart('Pantalla Netflix 1 Mes', 100)">Agregar al carrito</button>
+                </div>
+            </div>
+            <div class="product">
+                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 2">
+                <div class="product-info">
+                    <h2>Pantalla Netflix</h2>
+                    <p>2 Meses</p>
+                    <p>Precio: L 200</p>
+                    <button onclick="addToCart('Pantalla Netflix 2 Meses', 200)">Agregar al carrito</button>
+                </div>
+            </div>
+            <div class="product">
+                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 3">
+                <div class="product-info">
+                    <h2>Pantalla Netflix</h2>
+                    <p>3 Meses</p>
+                    <p>Precio: L 300</p>
+                    <button onclick="addToCart('Pantalla Netflix 3 Meses', 300)">Agregar al carrito</button>
+                </div>
+            <br>
+            <div class="product">
+                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 3">
+                <div class="product-info">
+                    <h2>Pantalla Disney</h2>
+                    <p>3 Meses</p>
+                    <p>Precio: L 80</p>
+                    <button onclick="addToCart('Pantalla Netflix 3 Meses', 300)">Agregar al carrito</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <section class="cart" id="cart">
+        <h2>Tu Carrito</h2>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-total" id="cart-total"></div>
+        <div id="smart-button-container">
+            <div style="text-align: center;">
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+    </section>
+    <script src="https://www.paypal.com/sdk/js?client-id=AWLfQ1gBp_3g86tjMwq4uTt5sssQvX5MTeQJhBv490r1j9TopgVV20c9JWWa_4KVzdWiZTr753g-z_0v&currency=USD"></script>
+    <script>
+        let cart = [];
+        let total = 0;
+        let paypalButtonRendered = false;
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            const cartCount = document.getElementById('cart-count');
+            cartItems.innerHTML = '';
+            total = 0;
+
+            cart.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <span>${item.name} - $${item.price.toFixed(2)}</span>
+                    <button class="remove-item" onclick="removeFromCart(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                cartItems.appendChild(itemElement);
+                total += item.price;
+            });
+
+            cartTotal.textContent = `Total: L${total.toFixed(2)}`;
+            cartCount.textContent = cart.length;
+            
+            if (!paypalButtonRendered && cart.length > 0) {
+                initPayPalButton();
+                paypalButtonRendered = true;
+            }
+        }
+
+        function toggleCart() {
+            const cartElement = document.getElementById('cart');
+            cartElement.style.display = cartElement.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function initPayPalButton() {
+            paypal.Buttons({
+                style: {
+                    shape: 'rect',
+                    color: 'gold',
+                    layout: 'vertical',
+                    label: 'pay',
+                },
+
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            description: "Compra en Boutique Elegante",
+                            amount: {
+                                currency_code: "USD",
+                                value: total.toFixed(2)
+                            }
+                        }]
+                    });
+                },
+
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(orderData) {
+                        console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                        alert('¡Compra realizada con éxito!');
+                        cart = [];
+                        updateCart();
+                        toggleCart();
+                    });
+                },
+
+                onError: function(err) {
+                    console.log(err);
+                }
+            }).render('#paypal-button-container');
+        }
+
+        updateCart();
+    </script>
+</body>
+</html>

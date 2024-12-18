@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Pedido - StreamPlus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+    <h2>Registrar Pedido</h2>
+    <form method="POST" action="{{ url_for('agregar_pedido') }}">
+        <label>ID: {{ next_id }}</label><br>
+        <label>Cliente:</label>
+        <select name="cliente">
+            <option disabled="" selected="" value"">Seleccione una opcion</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente[0] }}-{{ cliente[1]}}">{{ cliente[0] }}-{{ cliente[1] }}</option>
+            {% endfor %}
+        </select><br>
+
+            <label for="tipo_cuenta">Tipo de Cuenta</label>
+            <select class="form-control" id="tipo_cuenta" name="tipo_cuenta" required>
+                <option disabled="" selected="" value"">Seleccione una opcion</option>
+                {% for tipo in tipos_cuenta %}
+                <option value="{{ tipo }}">{{ tipo }}</option>
+                {% endfor %}
+            </select>
+        
+            <label for="cuenta_disponible">Cuenta Disponible</label>
+            <select class="form-control" id="cuenta_disponible" name="cuenta_disponible" required>
+            </select>
+        
+
+            <label for="fechaini">Fecha de Activacion</label>
+            <input type="date" class="form-control" id="fechaini" name="fechaini" required>
+        
+            <label for="dias">Duracion</label>
+            <select class="form-control" id="dias" name="dias" required>
+                <option value="30">1 Mes</option>
+                <option value="60">2 Meses</option>
+                <option value="90">3 Meses</option>
+            </select>
+        
+            <label for="monto">Monto</label>
+            <input type="number" class="form-control" id="monto" name="monto" step="0.01" required>
+        <button type="submit" class="btn btn-primary">Agregar Pedido</button>
+    </form>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+        <a class="btn btn-primary" href="{{ url_for('streamplus') }}">Volver</a>
+<script>
+    $(document).ready(function() {
+        $('#tipo_cuenta').change(function() {
+            var tipoCuenta = $(this).val();
+            $.ajax({
+                url: "{{ url_for('get_cuentas_disponibles', tipo_cuenta='') }}" + tipoCuenta,
+                method: 'GET',
+                success: function(data) {
+                    $('#cuenta_disponible').empty();
+                    data.forEach(function(cuenta) {
+                        $('#cuenta_disponible').append('<option value="' + cuenta + '">' + cuenta + '</option>');
+                    });
+                }
+            });
+        });
+
+        $('#fechaini, #dias').change(function() {
+            var fechaini = new Date($('#fechaini').val());
+            var dias = parseInt($('#dias').val());
+            if (fechaini && dias) {
+                var fechaexp = new Date(fechaini);
+                fechaexp.setDate(fechaini.getDate() + dias);
+                var day = ("0" + fechaexp.getDate()).slice(-2);
+                var month = ("0" + (fechaexp.getMonth() + 1)).slice(-2);
+                var fechaexpStr = fechaexp.getFullYear() + "-" + month + "-" + day;
+                $('#fechaexp').val(fechaexpStr);
+            }
+        });
+
+        $('#cuenta_disponible').change(function() {
+            var correoCuenta = $(this).val();
+            $.ajax({
+                url: "{{ url_for('get_inversion_route') }}",
+                method: 'GET',
+                data: { correo: correoCuenta },
+                success: function(data) {
+                    $('#inversion').val(data.inversion);
+                }
+            });
+        });
+    });
+</script>
+        
+</body>
+</html>

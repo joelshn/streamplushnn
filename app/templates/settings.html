@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración del Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Agregar Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Agregar FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Configuración del Usuario</h1>
+        <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4>Detalles del Usuario</h4>
+                <p><strong>Nombre de Usuario:</strong> {{ user_data['nombre_usuario'] }}</p>
+                <p><strong>Número de Teléfono:</strong> {{ user_data['numero_telefono'] }}</p>
+                <p><strong>Correo Electrónico:</strong> {{ user_data['correo_electronico'] }}</p>
+                <p>
+                    <strong>Código de Referido:</strong> 
+                    {{ user_data['codigo_referido'] }}
+                    <button class="btn btn-secondary btn-sm ml-2" onclick="copyToClipboard('{{ user_data['codigo_referido'] }}')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </p>
+                <p><strong>Saldo:</strong> L{{ user_data['saldo'] }}</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/send_password_reset" class="btn btn-warning">
+                <i class="fas fa-key"></i> Cambiar Contraseña
+            </a>
+        </div>
+    </div>
+
+    <!-- Agregar jQuery y Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Código de referido copiado al portapapeles");
+            });
+        }
+    </script>
+</body>
+</html>

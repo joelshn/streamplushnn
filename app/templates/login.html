@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StreamPlus</title>
+    <style>
+        /* Estilos para mensajes flash */
+
+        .flash-success {
+            color: #0ac235; 
+        }
+
+        .flash-info {
+            color: #0ac235; 
+            background-color: #d4edda; 
+            border-color: #c3e6cb; 
+        }
+
+        .flash-danger {
+            color: #e7081f; 
+            background-color: #f8d7da; 
+            border-color: #f5c6cb; 
+        }
+
+        .flash-warning {
+            color: #f0ad4e;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+</style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background: url('https://elcomercio.pe/resizer/KBc8clB-bDX3SuMpS3SLWCTxrK8=/980x528/smart/filters:format(jpeg):quality(75)/cloudfront-us-east-1.images.arcpublishing.com/elcomercio/LZNWRLEKLZH5ZBLDYNHRB4LGX4.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        label {
+            color: #f8d7da;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+        .login-form {
+            background-color: #333;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            padding-right: 30px; 
+        }
+        .password-container .toggle-password {
+            position: absolute;
+            top: 75%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="login-form">
+                <h1 style="color: #f8d7da;" class="text-center">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieGkUeZGUtcHFXvXvldzZrOPIXRhEQfH_OdthzY8ypt5-Vt7IAnlTmpSNGg9WZpf3fjfuNMveyAm5NSdvU2ipa1ggFN4ePPXr7GjtP8ZwtaP3VUBgp0ld-InUodUAXwV3CjBx5XLWW4gcosuKhjz2co0Z-2yiJVg7gi5nIELP6jha0O-kJ2LU9hN0ksiI/s1600/s.png" alt="StreamPlus" class="logo" height="140" width="140">
+                    <div></div>
+                    Iniciar Sesión
+                </h1>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <label for="identificador">Correo electrónico o nombre de usuario</label>
+                        <input type="text" class="form-control" id="identificador" name="identificador" required>
+                    </div>
+                    <div class="form-group password-container">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <span class="toggle-password">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <button type="submit" class="btn btn-dark btn-block">Iniciar Sesión</button>
+                </form>
+                <br>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <br>
+                <p style="color: #f8d7da;" class="text-center">¿No tienes cuenta? <a href="{{ url_for('register') }}">Registrarse</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('.toggle-password');
+        const passwordField = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    });
+</script>
+</body>
+</html>

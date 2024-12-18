@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirar Dinero - StreamPlus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a class="btn btn-primary" href="/streamplus">Volver</a>
+    <h5 class="card-title">Saldo: L {{ saldo }}</h5>
+    <h2>Retirar Dinero</h2>
+    <form id="retiroForm" action="{{ url_for('retirar_dinero') }}" method="POST">
+        <div class="form-group">
+            <label for="cantidad">Cantidad a Retirar:</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" step="0.01" min="100" required>
+                <small id="errorMensaje" class="form-text text-danger" style="display:none;">Minimo de retiro L.100</small>
+        </div>
+        <div class="form-group">
+            <label for="metpago">Método de Pago:</label>
+            <select class="form-control" id="metpago" name="metpago" required onchange="updatePaymentInfo()">
+                <option value="transferencia">Transferencia Bancaria</option>
+                <option value="tigo_money">Tigo Money</option>
+                <option value="paypal">PayPal</option>
+            </select>
+        </div>
+        <div id="transferencia-info" class="payment-info">
+            <div class="form-group">
+                <label for="banco">Banco:</label>
+                <select class="form-control" id="banco" name="banco">
+                    <option value="Atlantida">Atlantida</option>
+                    <option value="Ficohsa">Ficohsa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cuenta">Número de Cuenta:</label>
+                <input type="text" class="form-control" id="cuenta" name="cuenta">
+            </div>
+        </div>
+        <div id="tigo_money-info" class="payment-info" style="display: none;">
+            <div class="form-group">
+                <label for="telefono">Número de Teléfono:</label>
+                <input type="text" class="form-control" id="telefono" name="telefono">
+            </div>
+        </div>
+        <div id="paypal-info" class="payment-info" style="display: none;">
+            <div class="form-group">
+                <label for="paypal_email">Correo Electrónico de PayPal:</label>
+                <input type="email" class="form-control" id="paypal_email" name="paypal_email">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Retirar</button>
+    </form>
+    <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+</div>
+<h2>Historial de Retiros</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Monto</th>
+                <th>Metodo de Pago</th>
+                <th>Informacion de pago</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for retiro in retiros %}
+            <tr>
+                <td>{{ retiro[0] }}</td>
+                <td>{{ retiro[2] }}</td>
+                <td>{{ retiro[3] }}</td>
+                <td>{{ retiro[4] }}</td>
+                <td>{{ retiro[5] }}</td>
+                <td>{{ retiro[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<script>
+    function updatePaymentInfo() {
+        var metpago = document.getElementById('metpago').value;
+        var transferenciaInfo = document.getElementById('transferencia-info');
+        var tigoMoneyInfo = document.getElementById('tigo_money-info');
+        var paypalInfo = document.getElementById('paypal-info');
+
+        transferenciaInfo.style.display = 'none';
+        tigoMoneyInfo.style.display = 'none';
+        paypalInfo.style.display = 'none';
+
+        if (metpago === 'transferencia') {
+            transferenciaInfo.style.display = 'block';
+        } else if (metpago === 'tigo_money') {
+            tigoMoneyInfo.style.display = 'block';
+        } else if (metpago === 'paypal') {
+            paypalInfo.style.display = 'block';
+        }
+    }
+</script>
+
+<script>
+    document.getElementById('retiroForm').addEventListener('submit', function(event) {
+        var cantidad = document.getElementById('cantidad').value;
+        if (cantidad < 100) {
+            event.preventDefault();
+            document.getElementById('errorMensaje').style.display = 'block';
+        } else {
+            document.getElementById('errorMensaje').style.display = 'none';
+        }
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

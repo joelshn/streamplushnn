@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura - Venta {{next_id}}</title>
+    </head>
+    <body>
+        <h1>Factura - Venta {{next_id}}</h1>
+        <!-- Formulario de agregar venta -->
+         <form method="POST">
+            <!-- Campos del formulario -->
+        </form>
+
+         <!-- Mostrar el enlace de descarga de la factura -->
+        {% if factura_link %}
+        <br>
+        <a class="btn btn-primary" href="{{ factura_link }}" target="_blank" download>
+        Descargar Factura
+        </a>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamPlus - Crunchyroll</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #333;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: #444;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .membership-options {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+  }
+
+  .membership-option {
+    flex: 0 0 80%;
+    margin-right: 20px;
+    scroll-snap-align: start;
+    padding: 10px;
+    background-color: #555;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .membership-option:hover {
+    background-color: #666;
+  }
+
+  .membership-option img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .membership-option:last-child {
+    margin-right: 0;
+  }
+
+  #smart-button-container {
+    text-align: center;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .plan-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Elige tu plan:</h1>
+
+  <div class="membership-options">
+    <div class="membership-option" onclick="selectMembership('Perfil Crunchyroll 1 Mes', 3.28)">
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjpG3mB4DrO2gLJl3f9REEWReYEM1VPbLVB2Uf1jXe-GlxlnOh6EYqbuqsmiteQ5-OVbEO3y2diRqAIqQvLtT8bNaDxFrlmznc9krL-MBfgRzCXNEEWykmxIHaSoReb00zKgNpNBigboDF-facNtmv2Y9UziNREy9rgzGi31360lYwh6h2vdC9gDnn-EF4/s320/Dise%C3%B1o%20sin%20t%C3%ADtulo%20%287%29.png" width="200" height="200" alt="1 Mes">
+        <h3>1 Mes</h3>
+        <p>L.70</p>
+      </div>
+      <div class="membership-option" onclick="selectMembership('Perfil Crunchyroll 2 Meses', 6.24)">
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjpG3mB4DrO2gLJl3f9REEWReYEM1VPbLVB2Uf1jXe-GlxlnOh6EYqbuqsmiteQ5-OVbEO3y2diRqAIqQvLtT8bNaDxFrlmznc9krL-MBfgRzCXNEEWykmxIHaSoReb00zKgNpNBigboDF-facNtmv2Y9UziNREy9rgzGi31360lYwh6h2vdC9gDnn-EF4/s320/Dise%C3%B1o%20sin%20t%C3%ADtulo%20%287%29.png" width="200" height="200" alt="2 Meses">
+        <h3>2 Meses</h3>
+        <p>L.140</p>
+      </div>
+      <div class="membership-option" onclick="selectMembership('Perfil Crunchyroll 3 Meses', 9.20)">
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjpG3mB4DrO2gLJl3f9REEWReYEM1VPbLVB2Uf1jXe-GlxlnOh6EYqbuqsmiteQ5-OVbEO3y2diRqAIqQvLtT8bNaDxFrlmznc9krL-MBfgRzCXNEEWykmxIHaSoReb00zKgNpNBigboDF-facNtmv2Y9UziNREy9rgzGi31360lYwh6h2vdC9gDnn-EF4/s320/Dise%C3%B1o%20sin%20t%C3%ADtulo%20%287%29.png" width="200" height="200" alt="3 Meses">
+        <h3>3 Meses</h3>
+        <p>L.210</p>
+    </div>
+  </div>
+
+  <div id="smart-button-container">
+    <div class="plan-title" id="plan-title"></div>
+    <div style="text-align: center;">
+      <div id="paypal-button-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AWLfQ1gBp_3g86tjMwq4uTt5sssQvX5MTeQJhBv490r1j9TopgVV20c9JWWa_4KVzdWiZTr753g-z_0v&currency=USD" data-sdk-integration-source="button-factory"></script>
+<script>
+  var selectedProductName = "";
+  var selectedProductPrice = 0.00;
+
+  function selectMembership(productName, productPrice) {
+    selectedProductName = productName;
+    selectedProductPrice = productPrice;
+
+    // Ocultar todos los botones de PayPal
+    var paypalContainers = document.querySelectorAll('#paypal-button-container > *');
+    paypalContainers.forEach(container => {
+      container.style.display = 'none';
+    });
+
+    // Mostrar el contenedor del botón de PayPal
+    document.getElementById("smart-button-container").style.display = "block";
+    document.getElementById("plan-title").textContent = productName;
+    initPayPalButton();
+  }
+
+  function initPayPalButton() {
+    paypal.Buttons({
+      style: {
+        shape: 'rect',
+        color: 'gold',
+        layout: 'vertical',
+        label: 'pay',
+      },
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            description: selectedProductName,
+            amount: {
+              currency_code: 'USD',
+              value: selectedProductPrice.toFixed(2)
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(orderData) {
+          console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          window.location.href = 'https://39q8lhw3-8080.use2.devtunnels.ms/registro_pedidos';
+        });
+      },
+      onError: function(err) {
+        console.error('Error en el pago', err);
+      }
+    }).render('#paypal-button-container');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Cuenta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function calcularFechaVencimiento() {
+            const fechaCompra = document.querySelector('input[name="fechac"]').value;
+            if (fechaCompra) {
+                const fecha = new Date(fechaCompra);
+                fecha.setDate(fecha.getDate() + 30); // Añadir 30 días a la fecha de compra
+                const dd = String(fecha.getDate()).padStart(2, '0');
+                const mm = String(fecha.getMonth() + 1).padStart(2, '0'); // Enero es 0!
+                const yyyy = fecha.getFullYear();
+                const fechaVencimiento = `${yyyy}-${mm}-${dd}`;
+                document.querySelector('input[name="fechav"]').value = fechaVencimiento;
+            }
+        }
+    </script>
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+    <h1>Agregar Cuenta</h1>
+    <form method="POST">
+        <label>ID: {{ next_id }}</label><br>
+        <label>Tipo de Cuenta:</label>
+        <select name="tipo_cuenta">
+            <option disabled="" selected="" value"">Seleccione una opcion</option>
+            <option value="netflix">Netflix</option>
+            <option value="disneyplus">Disney+</option>
+            <option value="max">Max</option>
+            <option value="spotify">Spotify</option>
+            <option value="youtube">YouTube</option>
+            <option value="primevideo">Prime Video</option>
+        </select><br>
+        <label>Correo de la Cuenta:</label>
+        <input type="text" name="correoc" required><br>
+        <label>Contraseña:</label>
+        <input type="password" name="password" required><br>
+        <label>Fecha de Compra:</label>
+        <input type="date" name="fechac" required onchange="calcularFechaVencimiento()"><br>
+        <label>Fecha de Vencimiento:</label>
+        <input type="date" name="fechav" required><br>
+        <label>Perfiles:</label>
+        <input type="number" name="perfiles"><br>
+        <label>Inversión:</label>
+        <input type="number" name="inversion" step="any" required><br>
+        <button type="submit">Guardar</button>
+    </form>
+    <br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+    {% endblock %}
+    <a class="btn btn-primary" href="{{ url_for('streamplus') }}">Volver</a>
+</body>
+</html>

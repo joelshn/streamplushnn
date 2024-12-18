@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - StreamPlus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Agregar Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Agregar FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+<div class="container">
+
+    <div class="header">
+        <h2>Sesion: {{ session.username }}</h2>
+        <h5 class="card-title">Saldo: L {{ saldo_actual }}</h5>
+        <!-- Notificaciones -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell"></i> Notificaciones <span class="badge badge-light">{{ notificaciones|length }}</span>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {% if notificaciones %}
+                    {% for notificacion in notificaciones %}
+                        <a class="dropdown-item" href="{{ url_for('ver_renovaciones') }}">{{ notificacion }}</a>
+                    {% endfor %}
+                {% else %}
+                    <a class="dropdown-item" href="#">No hay notificaciones</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <ul class="option-list">
+            <li><a href="{{ url_for('tasas_de_pago') }}">Ver Tasas de Pago</a></li>
+            <li><a href="{{ url_for('agregar_pedido') }}">Registrar Pedido</a></li>
+            <li><a href="{{ url_for('agregar_cliente') }}">Registrar Cliente</a></li>
+            <li><a href="{{ url_for('ver_ventas_usuario') }}">Mis Ventas</a></li>
+            <li><a href="{{ url_for('ver_ingresos_usuario') }}">Mis Ingresos</a></li>
+            <li> <a href="{{ url_for('retirar') }}">Retirar</a></li>
+        </ul>
+        {% endblock %}
+    </div>
+</div>
+
+<!-- Agregar jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Agregar Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<!-- Agregar FontAwesome JS -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Administracion de StreamPlus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Agregar Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Agregar FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+
+    <div class="header">
+        <h2>Sesion: {{ session.username }}</h2>
+        <div></div>
+        <!-- Notificaciones -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell"></i> Notificaciones <span class="badge badge-light">{{ notificaciones|length }}</span>
+            </button>
+            <div class="dropdown-menu notificaciones-menu" aria-labelledby="dropdownMenuButton" style="background-color: black; color: white;">
+                {% if notificaciones %}
+                    {% for notificacion in notificaciones %}
+                        <li><a href="{{ notificacion.link }}">{{ notificacion.mensaje }}</a></li>
+                    {% endfor %}
+                {% else %}
+                    <a class="dropdown-item" href="#">No hay notificaciones</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="option-list">
+                    <li><a href="{{ url_for('agregar_cuenta') }}">Nueva Cuenta</a></li>
+                    <li><a href="{{ url_for('agregar_cliente') }}">Nuevo Cliente</a></li>
+                    <li><a href="{{ url_for('agregar_venta') }}">Nueva Venta</a></li>
+                    <li><a href="{{ url_for('ver_ingresos') }}">Ingresos</a></li>
+                    <li><a href="{{ url_for('ver_renovaciones') }}">Renovaciones</a></li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="option-list">
+                    <li><a href="{{ url_for('ver_cuentas') }}">Cuentas</a></li>
+                    <li><a href="{{ url_for('ver_clientes') }}">Clientes</a></li>
+                    <li><a href="{{ url_for('mostrar_usuarios') }}">Usuarios</a></li>
+                    <li><a href="{{ url_for('ver_ventas') }}">Ventas</a></li>
+                    <li><a href="{{ url_for('ver_pedidos') }}">Pedidos</a></li>
+                    <li><a href="{{ url_for('ver_retiros') }}">Solicitudes de Retiro</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</div>
+
+<!-- Agregar jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Agregar Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<!-- Agregar FontAwesome JS -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+</body>
+</html>

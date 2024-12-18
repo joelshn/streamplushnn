@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Venta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+    <h1>Agregar Venta</h1>
+    <form method="POST">
+        <label>ID: {{ next_id }}</label><br>
+        <label>Cliente:</label>
+        <select name="cliente">
+            <option disabled="" selected="" value"">Seleccione una opcion</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente[0] }}-{{ cliente[1]}}">{{ cliente[0] }}_{{ cliente[1] }} ({{ cliente[2] }})</option>
+            {% endfor %}
+        </select><br>
+        <label>Tipo de Cuenta:</label>
+        <select name="tipo_cuenta" id="tipo_cuenta">
+            <option disabled="" selected="" value"">Seleccione una opcion</option>
+            {% for tipo in tipos_cuenta %}
+                <option value="{{ tipo }}">{{ tipo }}</option>
+            {% endfor %}
+        </select><br>
+        <label>Cuenta Disponible:</label>
+        <select name="cuenta_disponible" id="cuenta_disponible">
+        </select><br>
+        <label>Fecha de Activación:</label>
+        <input type="date" name="fechaini" id="fechaini" required><br>
+        <label>Duracion:</label>
+        <select class="form-control" id="dias" name="dias" required>
+            <option value="30">1 Mes</option>
+            <option value="60">2 Meses</option>
+            <option value="90">3 Meses</option>
+        </select>
+        <label>Monto:</label>
+        <input type="number" name="monto" step="any" required><br>
+        <label>Referido:</label>
+        <input type="text" name="referido" id="referido" step="any" required><br>
+        <button type="submit">Guardar</button>
+    </form>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+
+    <script>
+        $(document).ready(function() {
+            $('#tipo_cuenta').change(function() {
+                var tipoCuenta = $(this).val();
+                $.ajax({
+                    url: "{{ url_for('get_cuentas_disponibles', tipo_cuenta='') }}" + tipoCuenta,
+                    method: 'GET',
+                    success: function(data) {
+                        $('#cuenta_disponible').empty();
+                        data.forEach(function(cuenta) {
+                            $('#cuenta_disponible').append('<option value="' + cuenta[1] + '">' + cuenta[0] + ' (ID: ' + cuenta[1] + ') (Perfiles: ' + cuenta[2] +')' + '</option>');
+                        });
+                    }
+                });
+            });
+
+            $('#fechaini, #dias').change(function() {
+                var fechaini = new Date($('#fechaini').val());
+                var dias = parseInt($('#dias').val());
+                if (fechaini && dias) {
+                    var fechaexp = new Date(fechaini);
+                    fechaexp.setDate(fechaini.getDate() + dias);
+                    var day = ("0" + fechaexp.getDate()).slice(-2);
+                    var month = ("0" + (fechaexp.getMonth() + 1)).slice(-2);
+                    var fechaexpStr = fechaexp.getFullYear() + "-" + month + "-" + day;
+                    $('#fechaexp').val(fechaexpStr);
+                }
+            });
+
+            $('#cuenta_disponible').change(function() {
+                var correoCuenta = $(this).val();
+                $.ajax({
+                    url: "{{ url_for('get_inversion_route') }}",
+                    method: 'GET',
+                    data: { correo: correoCuenta },
+                    success: function(data) {
+                        $('#inversion').val(data.inversion);
+                    }
+                });
+            });
+        });
+    </script>
+
+<script>
+    document.getElementById('formulario').addEventListener('submit', function (event) {
+        // Enlace directo del archivo
+        const nextId = "{{ next_id }}"; // Valor pasado por Flask
+        const fileLink = `https://127.0.0.1:8080/factura/${nextId}`; // Cambia por tu enlace real
+
+        // Permitir el envío del formulario
+        const form = this;
+
+        // Esperar un pequeño retraso para iniciar la descarga después de enviar el formulario
+        setTimeout(() => {
+            // Crear un enlace y simular un clic para descargar el archivo
+            const a = document.createElement('a');
+            a.href = fileLink;
+            a.download = ''; // Opcional: nombre del archivo
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }, 500); // Ajusta el tiempo según sea necesario para permitir el envío
+    });
+</script>
+        <button class="btn btn-primary"><a href="/admin">Volver</a></button>
+</body>
+</html>

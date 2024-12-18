@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas del Usuario - StreamPlus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <h2>Ventas del Usuario</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tipo de Cuenta</th>
+                <th>Cuenta Disponible</th>
+                <th>Fecha de Inicio</th>
+                <th>Días</th>
+                <th>Fecha de Expiración</th>
+                <th>Monto</th>
+                <th>Inversión</th>
+                <th>Ganancia Total</th>
+                <th>Ganancia del Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venta in ventas %}
+            <tr>
+                <td>{{ venta[0] }}</td>
+                <td>{{ venta[2] }}</td>
+                <td>{{ venta[3] }}</td>
+                <td>{{ venta[4] }}</td>
+                <td>{{ venta[5] }}</td>
+                <td>{{ venta[6] }}</td>
+                <td>{{ venta[7] }}</td>
+                <td>{{ venta[8] }}</td>
+                <td>{{ venta[9] }}</td>
+                <td>{{ venta[12] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<a class="btn btn-primary" href="/streamplus">Volver</a>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

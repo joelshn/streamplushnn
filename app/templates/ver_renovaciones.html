@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renovaciones</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
+    <div class="header">
+        <h1>Clientes que deben renovar</h1>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+    </div>
+    <div class="container">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Tipo de Cuenta</th>
+                <th>Cuenta Disponible</th>
+                <th>Fecha de Activación</th>
+                <th>Fecha de Expiración</th>
+                <th>Acciones</th>
+            </tr>
+            {% for renovacion in renovaciones %}
+            <tr>
+                <td>{{ renovacion[0] }}</td>
+                <td>{{ renovacion[6] }} ({{ renovacion[7] }})</td>
+                <td>{{ renovacion[2] }}</td>
+                <td>{{ renovacion[3] }}</td>
+                <td>{{ renovacion[4] }}</td>
+                <td>{{ renovacion[5] }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('renovar_venta', venta_id=renovacion[0]) }}" style="display:inline;">
+                        <input type="number" name="dias" placeholder="Días" required>
+                        <button type="submit">Renovar</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('no_renovo', venta_id=renovacion[0]) }}" style="display:inline;">
+                        <button type="submit">No Renovo</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="{{ url_for('admin') }}">Volver</a>
+    </div>
+    {% endblock %}
+</body>
+</html>

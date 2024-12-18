@@ -1,0 +1,337 @@
+/* Estilos generales */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: url('https://st.depositphotos.com/30440304/54543/i/450/depositphotos_545438588-stock-photo-style-black-background-geometric-layers.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: white;
+}
+
+/* Contenedor principal */
+.container {
+    width: 80%;
+    margin: 20px auto;
+    background: url('https://st.depositphotos.com/30440304/54543/i/450/depositphotos_545438588-stock-photo-style-black-background-geometric-layers.jpg') no-repeat center center;
+    background-size: cover;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para formularios */
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #4CAF50;
+}
+
+input[type="submit"],
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #45a049;
+    transform: translateY(-3px);
+}
+
+input[type="submit"]:active,
+button:active {
+    transform: translateY(0);
+}
+
+/* Estilos para encabezado */
+.header {
+    background-color: #2c1ead;
+    color: #fff;
+    padding: 15px 20px;
+    text-align: center;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.header:hover {
+    background-color: #630aa8;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+/* Estilos para el contenido principal */
+.main-content {
+    padding: 20px;
+}
+
+/* Estilos para la lista de opciones */
+.option-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.option-list li {
+    margin-bottom: 10px;
+    background-color: #2c1ead;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.option-list li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background-color: #630aa8;
+}
+
+.option-list li a {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+    display: block;
+}
+
+.option-list li a:hover {
+    color: #45d84a;
+}
+
+/* Estilos para el pie de página */
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #494747;
+    font-size: 0.9em;
+    color: #ffffff;
+}
+
+/* Estilos responsivos */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 90%;
+    }
+    
+    .header h1 {
+        font-size: 1.5em;
+    }
+    
+    .option-list li {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    input[type="submit"],
+    button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 1.2em;
+    }
+    
+    .option-list li {
+        padding: 8px;
+        font-size: 0.8em;
+    }
+
+    input[type="submit"],
+    button {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+}
+
+/* Estilos para tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #2c1ead;
+    color: rgb(255, 255, 255);
+}
+
+td {
+    color: white;
+}
+
+tr {
+    background-color: #5c5b5b;
+}
+
+tr:hover {
+    background-color: #2c1ead;
+}
+
+/* Estilos responsivos */
+@media (max-width: 600px) {
+    table {
+        font-size: 10px; /* Reducir tamaño de fuente */
+    }
+
+    th, td {
+        padding: 6px; /* Reducir padding */
+    }
+
+    th {
+        font-size: 12px; /* Reducir tamaño de fuente en encabezados */
+    }
+
+    td {
+        font-size: 10px; /* Reducir tamaño de fuente en celdas */
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.container, .header, .ingresos, .option-list li, table {
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Estilos para mensajes flash */
+.flash-success {
+    color: #0ac235; /* Verde */
+}
+
+.flash-info {
+    color: #0ac235; /* Verde */
+}
+
+.flash-danger {
+    color: #e7081f; /* Rojo */
+}
+
+.flash-warning {
+    color: #efcd1f;
+}
+
+/* Estilos del menú de notificaciones */
+.notificaciones-menu {
+    max-height: 300px; /* Altura máxima del menú */
+    overflow-y: auto;  /* Habilita el desplazamiento vertical */
+    width: 100%;       /* Ajuste para pantallas pequeñas */
+    max-width: 350px;  /* Ancho máximo en pantallas grandes */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    padding: 10px 0;   /* Espacio interno superior e inferior */
+    background-color: #2c1ead; /* Fondo  */
+    border: 1px solid #2c1ead; /* Borde suave */
+}
+
+/* Lista de notificaciones */
+.notificaciones-menu ul {
+    list-style-type: none; /* Sin viñetas */
+    padding: 0;
+    margin: 0;
+}
+
+/* Cada notificación */
+.notificaciones-menu li {
+    padding: 10px 20px; /* Espaciado interno */
+    border-bottom: 1px solid #eee; /* Línea separadora entre notificaciones */
+    transition: background-color 0.3s ease;
+}
+
+/* Última notificación sin borde inferior */
+.notificaciones-menu li:last-child {
+    border-bottom: none;
+}
+
+/* Enlaces de notificaciones */
+.notificaciones-menu a {
+    color: #333; /* Color del texto */
+    font-weight: 500; /* Fuente un poco más gruesa */
+    text-decoration: none; /* Quitar subrayado */
+    display: block; /* Hacer que ocupe todo el área */
+}
+
+/* Efecto hover en enlaces */
+.notificaciones-menu a:hover {
+    background-color: #f8f9fa; /* Cambio de fondo suave al pasar el mouse */
+}
+
+/* Efecto al pasar el mouse sobre una notificación */
+.notificaciones-menu li:hover {
+    background-color: #f1f1f1;
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+    .notificaciones-menu {
+        max-width: 90%; /* Reduce el ancho para móviles */
+    }
+
+    .notificaciones-menu li {
+        padding: 8px 15px; /* Ajusta el padding en pantallas pequeñas */
+    }
+}

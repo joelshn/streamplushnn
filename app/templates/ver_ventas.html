@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="header">
+        <h1>Ventas</h1>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+    </div>
+    <form id="searchForm">
+        <select id="filter">
+            <option value="referido">Buscar por Referido</option>
+            <option value="referido">Buscar por Referido</option>
+            <option value="cliente">Buscar por Cliente</option>
+            <option value="tipo_cuenta">Buscar por Tipo de Cuenta</option>
+            <!-- Agrega más opciones según los campos que quieras filtrar -->
+        </select>
+        <input type="text" id="searchInput" placeholder="Buscar...">
+        <button type="button" onclick="filterTable()">Buscar</button>
+    </form>    
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Tipo de Cuenta</th>
+            <th>Cuenta Disponible</th>
+            <th>Fecha de Activación</th>
+            <th>Días</th>
+            <th>Fecha de Expiración</th>
+            <th>Monto</th>
+            <th>Inversión</th>
+            <th>Ganancia</th>
+            <th>Ganancia del Usuario</th>
+            <th>Referido</th>
+        </tr>
+        {% for venta in ventas %}
+        <tr>
+            <td>{{ venta[0] }}</td>
+            <td>{{ venta[1] }}</td>
+            <td>{{ venta[2] }}</td>
+            <td>{{ venta[3] }}</td>
+            <td>{{ venta[4] }}</td>
+            <td>{{ venta[5] }}</td>
+            <td>{{ venta[6] }}</td>
+            <td>{{ venta[7] }}</td>
+            <td>{{ venta[8] }}</td>
+            <td>{{ venta[9] }}</td>
+            <td>{{ venta[12] }}</td>
+            <td>{{ venta[11] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a class="btn btn-primary" href="{{ url_for('admin') }}">Volver</a>
+    </div>
+</body>
+<script>
+    function filterTable() {
+        let filter = document.getElementById("filter").value;
+        let searchValue = document.getElementById("searchInput").value.toLowerCase();
+        let table = document.querySelector("table");
+        let rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { // Empieza desde 1 para saltar el encabezado
+            let cells = rows[i].getElementsByTagName("td");
+            let cellValue;
+            
+            if (filter === "referido") {
+                cellValue = cells[11].textContent || cells[11].innerText;
+            } else if (filter === "cliente") {
+                cellValue = cells[1].textContent || cells[1].innerText;
+            } else if (filter === "tipo_cuenta") {
+                cellValue = cells[2].textContent || cells[2].innerText;
+            }
+            // Agrega más condiciones para otros filtros
+
+            if (cellValue.toLowerCase().indexOf(searchValue) > -1) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
+</html>
