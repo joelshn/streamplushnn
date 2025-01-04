@@ -7,7 +7,7 @@ from email.header import decode_header
 IMAP_SERVER = "imap.gmail.com"
 IMAP_PORT = 993
 GMAIL_USER = "streamplus504hn@gmail.com"  # Reemplaza con tu correo
-GMAIL_PASSWORD = "jzqj pyhr anxg gelj"  # Reemplaza con la contraseña generada
+GMAIL_PASSWORD = "ilne eurm nllf lrvd"  # Reemplaza con la contraseña generada
 
 app = Flask(__name__)
 
@@ -93,4 +93,4 @@ def show_email():
     return render_template_string(html_template)
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0', port=80)
+    app.run(debug=True,host='0.0.0.0', port=50)

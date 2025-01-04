@@ -505,6 +505,50 @@ def index():
     ]
     return render_template("index.html", products=products)
 
+# Ruta estado de cuentas
+@app.route("/estado")
+def estado():
+    conn = connect_db()
+    cursor = conn.cursor(dictionary=True)
+
+    # Consulta a la tabla cuentas
+    cursor.execute("""
+        SELECT id, tipocuenta, correoc, perfiles, fechac, fechav 
+        FROM cuentas
+    """)
+    cuentas = cursor.fetchall()
+
+    data = []
+    current_date = datetime.now().date()
+
+    for cuenta in cuentas:
+        # Verificar usuarios activos según fechas
+        if cuenta['fechac'] <= current_date <= cuenta['fechav']:
+            # Consulta a la tabla ventas para relacionar los datos
+            cursor.execute("""
+                SELECT id, cliente, tipocuenta, cuenta_disponible, fechaini, fechaexp 
+                FROM ventas 
+                WHERE cuenta_disponible = %s AND %s BETWEEN fechaini AND fechaexp
+            """, (cuenta['id'], current_date))
+            ventas = cursor.fetchall()
+
+            # Verificar perfiles disponibles
+            perfiles_ocupados = len(ventas)
+            perfiles_disponibles = cuenta['perfiles']
+            if perfiles_disponibles < 0:
+                perfiles_disponibles = 0
+
+
+            data.append({
+                "cuenta": cuenta,
+                "ventas": ventas,
+                "perfiles_disponibles": perfiles_disponibles
+            })
+
+    cursor.close()
+    conn.close()
+    return render_template("estado.html", data=data)
+
 
 # Ruta para ver los usuarios registrados
 @app.route('/usuarios', endpoint='mostrar_usuarios')
@@ -1065,7 +1109,7 @@ def no_renovo(venta_id):
     cursor.execute("SELECT cuenta_disponible FROM ventas WHERE id = %s", (venta_id,))
     cuenta_disponible = cursor.fetchone()[0]
 
-    cursor.execute("UPDATE cuentas SET perfiles = perfiles + 1 WHERE correoc = %s", (cuenta_disponible,))
+    cursor.execute("UPDATE cuentas SET perfiles = perfiles + 1 WHERE id = %s", (cuenta_disponible,))
     cursor.execute("UPDATE ventas SET estado = 'inactivo' WHERE id = %s", (venta_id,))
     db.commit()
     db.close()
