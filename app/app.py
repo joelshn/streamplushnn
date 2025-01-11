@@ -864,7 +864,7 @@ def ver_ingresos():
 
     # Ingresos anuales
     current_year = datetime.now().year
-    cursor.execute("SELECT SUM(ganancia) FROM ventas WHERE YEAR(fechaini) = %s", (current_year,))
+    cursor.execute("SELECT SUM(ganancia) FROM ventas")
     ingresos_anuales = cursor.fetchone()[0] or 0
 
      # Ingresos por referidos mensuales y anuales
@@ -979,7 +979,7 @@ def ver_ingresos_usuario():
     cursor.execute("SELECT SUM(gananciaref) FROM ventas WHERE referido = %s AND MONTH(fechaini) = %s", (referido, current_month))
     ingresos_mensuales = cursor.fetchone()[0] or 0
 
-    cursor.execute("SELECT SUM(gananciaref) FROM ventas WHERE referido = %s AND YEAR(fechaini) = %s", (referido, current_year))
+    cursor.execute("SELECT SUM(gananciaref) FROM ventas WHERE referido = %s", (referido,))
     ingresos_anuales = cursor.fetchone()[0] or 0
 
     db.close()
