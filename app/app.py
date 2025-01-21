@@ -18,6 +18,7 @@ import email
 from email.header import decode_header
 from imapclient import IMAPClient
 import chardet
+import os
 
 app = Flask(__name__)
 app.secret_key = '29122020'
@@ -839,6 +840,157 @@ def obtener_cuentas_disponibles_por_tipo(tipo_cuenta):
     db.close()
     return [cuenta for cuenta in cuentas_disponibles] 
 
+@app.route('/agregar_ventas_multiples', methods=['GET', 'POST'])
+@admin_required
+def agregar_ventas_multiples():
+    if request.method == 'POST':
+        data = request.json
+        cliente = data.get('cliente')
+        ventas = data.get('ventas', [])
+        if not cliente or not ventas:
+            return jsonify({'error': 'Datos incompletos'}), 400
+
+        db = connect_db()
+        cursor = db.cursor()
+
+        try:
+            total_monto = 0
+            detalles_ventas = []
+
+            for venta in ventas:
+                tipo_cuenta = venta['tipo_cuenta']
+                cuenta_disponible = venta['cuenta_disponible']
+                fechaini = datetime.strptime(venta['fechaini'], '%Y-%m-%d')
+                dias = int(venta['dias'])
+                fechaexp = fechaini + timedelta(days=dias)
+                monto = float(venta['monto'])
+                inversion = get_inversion(cuenta_disponible, tipo_cuenta)
+
+                cursor.execute("""
+                    INSERT INTO ventas (cliente, tipocuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (cliente, tipo_cuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion))
+
+                # Restar perfiles en la cuenta
+                restar_perfil(cuenta_disponible)
+
+                total_monto += monto
+                detalles_ventas.append({
+                    'tipo_cuenta': tipo_cuenta,
+                    'cuenta_disponible': cuenta_disponible,
+                    'fechaini': fechaini.strftime('%Y-%m-%d'),
+                    'dias': dias,
+                    'fechaexp': fechaexp.strftime('%Y-%m-%d'),
+                    'monto': monto
+                })
+
+            db.commit()
+
+            # Generar factura consolidada
+            factura_id = generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas)
+
+            return jsonify({
+                'message': 'Ventas agregadas exitosamente',
+                'factura_url': f'/factura_{factura_id}'
+            }), 200
+
+        except Exception as e:
+            db.rollback()
+            return jsonify({'error': f'Error al procesar ventas: {e}'}), 500
+
+        finally:
+            db.close()
+
+    # En caso de GET, renderizar la página con los datos necesarios
+    clientes = obtener_clientes()
+    tipos_cuenta = ["netflix", "disneyplus", "max", "spotify", "youtube", "primevideo"]
+    cuentas_disponibles = obtener_cuentas_disponibles()
+
+    return render_template(
+        'agregar_ventas_multiples.html',
+        clientes=clientes,
+        tipos_cuenta=tipos_cuenta,
+        cuentas_disponibles=cuentas_disponibles
+    )
+
+
+FACTURA_DIR = os.path.join(os.getcwd(), 'facturas')
+
+def generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas):
+    """
+    Genera una factura consolidada para múltiples ventas de un único cliente.
+    Devuelve un ID único para la factura.
+    """
+    factura_id = random.randint(10000, 99999)
+
+    # Crear una imagen en blanco
+    height = 1500 + len(detalles_ventas) * 100  # Ajustar la altura según el número de ventas
+    img = Image.new('RGB', (1000, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Cargar el logotipo desde la URL
+    logo_url = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieGkUeZGUtcHFXvXvldzZrOPIXRhEQfH_OdthzY8ypt5-Vt7IAnlTmpSNGg9WZpf3fjfuNMveyAm5NSdvU2ipa1ggFN4ePPXr7GjtP8ZwtaP3VUBgp0ld-InUodUAXwV3CjBx5XLWW4gcosuKhjz2co0Z-2yiJVg7gi5nIELP6jha0O-kJ2LU9hN0ksiI/s1600/s.png"
+    logo_response = requests.get(logo_url)
+    logo = Image.open(BytesIO(logo_response.content))
+    logo = ImageOps.contain(logo, (250, 250))
+    img.paste(logo, (50, 50))
+
+    # Cargar fuentes
+    font_path = "arial.ttf"
+    font_largebold = ImageFont.truetype("arialbd.ttf", 60)
+    font_medium = ImageFont.truetype(font_path, 40)
+    font_small = ImageFont.truetype(font_path, 35)
+    font_smallc = ImageFont.truetype(font_path, 30)
+    font_bold = ImageFont.truetype("arialbd.ttf", 40)
+
+    # Encabezado de la factura
+    draw.text((350, 50), "StreamPlus", font=font_largebold, fill=(0, 0, 0))
+    draw.text((350, 150), "Honduras, C.A", font=font_bold, fill=(0, 0, 0))
+    draw.text((350, 200), "Teléfono: 9730-2756", font=font_bold, fill=(0, 0, 0))
+    draw.text((350, 250), "Email: admin@streamplushn.com", font=font_bold, fill=(0, 0, 0))
+
+    # Datos de la factura
+    draw.text((50, 350), f"Factura ID: {factura_id}", font=font_bold, fill=(0, 0, 0))
+    draw.text((50, 425), "Fecha de Emisión:", font=font_bold, fill=(0, 0, 0))
+    draw.text((450, 425), f"{datetime.now().strftime('%Y-%m-%d')}", font=font_medium, fill=(0, 0, 0))
+    draw.text((50, 500), "Cliente:", font=font_bold, fill=(0, 0, 0))
+    draw.text((450, 500), f"{cliente}", font=font_medium, fill=(0, 0, 0))
+    draw.text((50, 575), "Monto Total:", font=font_bold, fill=(0, 0, 0))
+    draw.text((450, 575), f"{total_monto:.2f} L", font=font_medium, fill=(0, 0, 0))
+
+    # Dibujar encabezado para detalles
+    y_offset = 650
+    draw.text((50, y_offset), "Detalles de la Compra", font=font_largebold, fill=(0, 0, 0))
+    y_offset += 100
+
+    # Dibujar cada venta
+    for i, venta in enumerate(detalles_ventas, start=1):
+        draw.text((50, y_offset), f"{i}. Tipo de Cuenta: {venta['tipo_cuenta']}", font=font_bold, fill=(0, 0, 0))
+        draw.text((50, y_offset + 50), f"   ID Cuenta: {venta['cuenta_disponible']}", font=font_smallc, fill=(0, 0, 0))
+        draw.text((50, y_offset + 100), f"   Fecha de Inicio: {venta['fechaini']}", font=font_small, fill=(0, 0, 0))
+        draw.text((50, y_offset + 150), f"   Vence: {venta['fechaexp']}", font=font_small, fill=(0, 0, 0))
+        draw.text((50, y_offset + 200), f"   Monto: {venta['monto']:.2f} L", font=font_small, fill=(0, 0, 0))
+        y_offset += 250
+
+    # Guardar imagen
+    factura_dir = os.path.join(os.getcwd(), "facturas")
+    os.makedirs(factura_dir, exist_ok=True)
+    factura_path = os.path.join(factura_dir, f"factura_{factura_id}.png")
+    img.save(factura_path)
+
+    return factura_id
+
+
+@app.route('/factura_<int:factura_id>', methods=['GET'])
+def descargar_factura(factura_id):
+    factura_path = os.path.join(FACTURA_DIR, f'factura_{factura_id}.png')
+    if os.path.exists(factura_path):
+        return send_file(factura_path, as_attachment=True, download_name=f'factura_{factura_id}.png')
+    else:
+        return jsonify({'error': 'Factura no encontrada'}), 404
+
+
+
 @app.route('/get_inversion')
 def get_inversion_route():
     db = connect_db()
@@ -1350,7 +1502,7 @@ def generar_factura(venta_id):
     draw.text((350, 50), "StreamPlus", font=font_largebold, fill=(0, 0, 0))
     draw.text((350, 150), "Honduras, C.A", font=font_bold, fill=(0, 0, 0))
     draw.text((350, 200), "Teléfono: 9730-2756", font=font_bold, fill=(0, 0, 0))
-    draw.text((350, 250), "Email: streamplushn@gmail.com", font=font_bold, fill=(0, 0, 0))
+    draw.text((350, 250), "Email: admin@streamplushn.com", font=font_bold, fill=(0, 0, 0))
 
     # Dibujar los datos de la factura
     draw.text((50, 350), f"Factura ID: {venta['id']}", font=font_bold, fill=(0, 0, 0))

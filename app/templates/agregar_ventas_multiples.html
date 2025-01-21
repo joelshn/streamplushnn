@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Ventas para un Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Agregar Ventas para un Cliente</h1>
+        <form id="ventas_form">
+            <label>Cliente:</label>
+            <select name="cliente" id="cliente" required>
+                <option disabled selected value="">Seleccione un cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente[0] }}-{{ cliente[1]}}">{{ cliente[0] }}_{{ cliente[1] }} ({{ cliente[2] }})</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <div id="ventas_container">
+                <!-- Primera fila de venta -->
+                <div class="venta">
+                    <h3>Cuenta 1</h3>
+                    <label>Tipo de Cuenta:</label>
+                    <select name="ventas[0][tipo_cuenta]" class="tipo_cuenta">
+                        <option disabled selected value="">Seleccione una opción</option>
+                        {% for tipo in tipos_cuenta %}
+                        <option value="{{ tipo }}">{{ tipo }}</option>
+                        {% endfor %}
+                    </select><br>
+                    <label>Cuenta Disponible:</label>
+                    <select name="ventas[0][cuenta_disponible]" class="cuenta_disponible">
+                    </select><br>
+                    <label>Fecha de Activación:</label>
+                    <input type="date" name="ventas[0][fechaini]" class="fechaini" required><br>
+                    <label>Duración:</label>
+                    <select name="ventas[0][dias]" class="dias" required>
+                        <option value="30">1 Mes</option>
+                        <option value="60">2 Meses</option>
+                        <option value="90">3 Meses</option>
+                    </select><br>
+                    <label>Monto:</label>
+                    <input type="number" name="ventas[0][monto]" step="any" required><br>
+                </div>
+            </div>
+            <button type="button" id="add_venta">Agregar Otra Cuenta</button>
+            <button type="submit">Guardar Ventas</button>
+        </form>
+        <br>
+        <button class="btn btn-primary"><a href="/admin">Volver</a></button>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let ventaIndex = 0;
+    
+            // Añadir una nueva fila de venta
+            $('#add_venta').click(function () {
+                ventaIndex++;
+                $('#ventas_container').append(`
+                    <div class="venta">
+                        <h3>Cuenta ${ventaIndex + 1}</h3>
+                        <label>Tipo de Cuenta:</label>
+                        <select name="ventas[${ventaIndex}][tipo_cuenta]" class="tipo_cuenta">
+                            <option disabled selected value="">Seleccione una opción</option>
+                            {% for tipo in tipos_cuenta %}
+                            <option value="{{ tipo }}">{{ tipo }}</option>
+                            {% endfor %}
+                        </select><br>
+                        <label>Cuenta Disponible:</label>
+                        <select name="ventas[${ventaIndex}][cuenta_disponible]" class="cuenta_disponible">
+                        </select><br>
+                        <label>Fecha de Activación:</label>
+                        <input type="date" name="ventas[${ventaIndex}][fechaini]" class="fechaini" required><br>
+                        <label>Duración:</label>
+                        <select name="ventas[${ventaIndex}][dias]" class="dias" required>
+                            <option value="30">1 Mes</option>
+                            <option value="60">2 Meses</option>
+                            <option value="90">3 Meses</option>
+                        </select><br>
+                        <label>Monto:</label>
+                        <input type="number" name="ventas[${ventaIndex}][monto]" step="any" required><br>
+                    </div>
+                `);
+            });
+    
+            // Manejar cambios en tipo de cuenta para cargar cuentas disponibles
+            $(document).on('change', '.tipo_cuenta', function () {
+                const tipoCuenta = $(this).val();
+                const cuentaSelect = $(this).closest('.venta').find('.cuenta_disponible');
+                $.ajax({
+                    url: "{{ url_for('get_cuentas_disponibles', tipo_cuenta='') }}" + tipoCuenta,
+                    method: 'GET',
+                    success: function (data) {
+                        cuentaSelect.empty();
+                        cuentaSelect.append('<option disabled selected value="">Seleccione una cuenta disponible</option>');
+                        data.forEach(function (cuenta) {
+                            cuentaSelect.append(`<option value="${cuenta[1]}">${cuenta[0]} (ID: ${cuenta[1]}) (Perfiles: ${cuenta[2]})</option>`);
+                        });
+                    },
+                    error: function () {
+                        alert('Error al cargar cuentas disponibles.');
+                    }
+                });
+            });
+    
+            // Enviar todas las ventas como JSON
+            $('#ventas_form').submit(function (e) {
+                e.preventDefault();
+    
+                // Obtener el cliente
+                const cliente = $('#cliente').val();
+                if (!cliente) {
+                    alert('Por favor, selecciona un cliente.');
+                    return;
+                }
+    
+                // Serializar las ventas
+                const ventas = [];
+                $('#ventas_container .venta').each(function () {
+                    const tipoCuenta = $(this).find('.tipo_cuenta').val();
+                    const cuentaDisponible = $(this).find('.cuenta_disponible').val();
+                    const fechaIni = $(this).find('.fechaini').val();
+                    const dias = $(this).find('.dias').val();
+                    const monto = $(this).find('input[name$="[monto]"]').val();
+    
+                    // Verificar que los campos estén completos
+                    if (!tipoCuenta || !cuentaDisponible || !fechaIni || !dias || !monto) {
+                        alert('Por favor, completa todos los campos en cada venta.');
+                        return false;
+                    }
+    
+                    ventas.push({
+                        tipo_cuenta: tipoCuenta,
+                        cuenta_disponible: cuentaDisponible,
+                        fechaini: fechaIni,
+                        dias: dias,
+                        monto: monto,
+                    });
+                });
+    
+                // Enviar los datos al backend
+                $.ajax({
+                    url: "{{ url_for('agregar_ventas_multiples') }}",
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ cliente, ventas }),
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.href = response.factura_url;  // Redirige a la factura generada
+                    },
+                    error: function (xhr) {
+                        const error = xhr.responseJSON ? xhr.responseJSON.error : 'Error desconocido';
+                        alert(`Error: ${error}`);
+                    }
+                });
+            });
+        });
+    </script>
+    
+</body>
+</html>
