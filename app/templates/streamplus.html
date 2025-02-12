@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - StreamPlus</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Agregar Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -15,7 +16,6 @@
     {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
 
     {% block content %}
-<div class="container">
 
     <div class="header">
         <h2>Sesion: {{ session.username }}</h2>
@@ -34,28 +34,30 @@
                     <a class="dropdown-item" href="#">No hay notificaciones</a>
                 {% endif %}
             </div>
+            <br>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            <br>
         </div>
     </div>
-
-    <div class="main-content">
+    <br>
         <ul class="option-list">
-            <li><a href="{{ url_for('tasas_de_pago') }}">Ver Tasas de Pago</a></li>
-            <li><a href="{{ url_for('agregar_pedido') }}">Registrar Pedido</a></li>
+            <li><a href="{{ url_for('agregar_pedido') }}">Registrar Venta</a></li>
             <li><a href="{{ url_for('agregar_cliente') }}">Registrar Cliente</a></li>
             <li><a href="{{ url_for('ver_ventas_usuario') }}">Mis Ventas</a></li>
             <li><a href="{{ url_for('ver_ingresos_usuario') }}">Mis Ingresos</a></li>
             <li> <a href="{{ url_for('retirar') }}">Retirar</a></li>
         </ul>
-        {% endblock %}
+        
     </div>
 </div>
-
-<!-- Agregar jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<!-- Agregar Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<!-- Agregar FontAwesome JS -->
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
-
 </body>
+{% endblock %}
 </html>

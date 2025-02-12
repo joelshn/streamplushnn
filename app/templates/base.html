@@ -3,32 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Administracion de StreamPlus{% endblock %}</title>
+    <title>{% block title %}Administración de StreamPlus{% endblock %}</title>
     <style>
         body {
             background: url('https://st.depositphotos.com/30440304/54543/i/450/depositphotos_545438588-stock-photo-style-black-background-geometric-layers.jpg') no-repeat center center fixed;
-            background-size: cover; /* Hace que la imagen cubra todo el fondo */
-            color: #fff !important; /* Texto blanco por defecto */
+            background-size: cover;
+            color: #fff !important;
             font-family: Arial, sans-serif;
         }
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Agregar Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Agregar FontAwesome para íconos -->
+    <!-- FontAwesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class="header d-flex justify-content-between align-items-center">
-        <h1><a href="/streamplus" style="color: white;">StreamPlus</a></h1>
-        <!-- Botón de Cerrar Sesión -->
+    <div class="header d-flex justify-content-between align-items-center p-3">
+        <h1><a href="/streamplus" style="color: white; text-decoration: none;">StreamPlus</a></h1>
         {% if 'username' in session %}
-            <a href="{{ url_for('settings') }}" class="btn btn-secondary mr-2">
+        <!-- Botón Ajustes con menú desplegable -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="ajustesMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-cog"></i> Ajustes
-            </a>
-            <a href="{{ url_for('logout') }}" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </a>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ajustesMenu">
+                <a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-user"></i> Perfil</a>
+                <a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </div>
+        </div>
         {% endif %}
     </div>
 
@@ -36,17 +39,13 @@
         {% block content %}{% endblock %}
     </div>
 
-    <div class="footer">
+    <div class="footer text-center py-3">
         <p>&copy; 2024 StreamPlus.</p>
     </div>
-</div>
 
-<!-- Agregar jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<!-- Agregar Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<!-- Agregar FontAwesome JS -->
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
-
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

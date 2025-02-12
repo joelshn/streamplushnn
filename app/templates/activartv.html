@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar Netflix en TV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+    <div class="container">
+    <h1>Activar Netflix en TV</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <br>
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+                <br>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="aviso">
+        <strong class="importante">⚠️ Instrucciones para activar Netflix en tu TV:</strong>
+        <ol style="text-align: left; padding-left: 20px;">
+            <li>Abre la aplicación de <strong class="importante">Netflix</strong> en tu TV.</li>
+            <li>Ve a iniciar sesion y Selecciona la opción <strong class="importante">Usar Celular</strong>.</li>
+            <li>En la pantalla, aparecerá un código único.</li>
+            <li>Ingresa ese código en el campo de abajo y presiona "Activar".</li>
+        </ol>
+    </div>
+    <form id="registro_form" method="POST" action="{{ url_for('activartv') }}">
+        <label for="codigo_tv">Código de Netflix:</label>
+        <input type="text" name="codigo_tv" required><br>
+        <button id="guardar" type="submit">Activar</button>
+    </form>
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Activando...</p>
+      </div>
+   </div>
+   <script>
+    $(document).ready(function () {
+        $('#registro_form').submit(function (e) {
+            // Mostrar la rueda de carga y deshabilitar el botón
+            $('#loading').show();
+            $('#guardar').prop('disabled', true);
+
+            // Continuar con el envío del formulario
+            return true;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, render_template_string
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, flash, render_template_string
 from datetime import datetime, timedelta
 from database import connect_db, get_next_id
 from decimal import Decimal
@@ -8,6 +8,7 @@ import random
 import requests
 import string
 import smtplib
+import time
 from email.mime.text import MIMEText
 from time import sleep
 from io import BytesIO
@@ -19,6 +20,13 @@ from email.header import decode_header
 from imapclient import IMAPClient
 import chardet
 import os
+import json
+import unicodedata
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 app = Flask(__name__)
 app.secret_key = '29122020'
@@ -28,32 +36,38 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 # Configuración de Gmail
 IMAP_SERVER = "imap.gmail.com"
 IMAP_PORT = 993
-GMAIL_USER = "streamplus504hn@gmail.com"  # Reemplaza con tu correo
-GMAIL_PASSWORD = "jzqj pyhr anxg gelj"  # Contraseña generada de Google
 
+def normalize_text(text):
+    """Convierte texto a mayúsculas y elimina tildes."""
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', text)
+        if not unicodedata.combining(c)
+    ).upper()
 #---------------------------------------------------------------------------------------------------------
-def fetch_last_email():
-    """Obtiene el último correo recibido con un filtro de asuntos específicos."""
-    try:
-        # Lista de asuntos permitidos
-        allowed_subjects = [
-            "¿Vas a actualizar tu Hogar de Disney+?",
-            "Netflix: Tu código de inicio de sesión",
-            "Tu código de acceso único para Disney+"
-        ]
+def fetch_latest_email(email_user, email_pass, subject_filter):
+    """Obtiene el último correo que coincida con el asunto especificado."""
 
-        # Conexión al servidor IMAP
+    try:
+        # Conectar al servidor IMAP
         mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
-        mail.login(GMAIL_USER, GMAIL_PASSWORD)
+        mail.login(email_user, email_pass)
         mail.select("inbox")
 
-        # Buscar todos los correos
+        # Obtener todos los correos
         status, messages = mail.search(None, "ALL")
         if status != "OK" or not messages[0]:
+            print("No se encontraron correos.")
+            mail.logout()
             return None
 
-        # Iterar desde el más reciente
-        for email_id in messages[0].split():
+        # Obtener la lista de IDs de los correos (últimos primero)
+        message_ids = messages[0].split()[::-1]  
+
+        # Normalizar el asunto de búsqueda
+        subject_filter = normalize_text(subject_filter)
+
+        # Revisar cada correo hasta encontrar uno con el asunto correcto
+        for email_id in message_ids:
             status, msg_data = mail.fetch(email_id, "(RFC822)")
             if status != "OK":
                 continue
@@ -64,143 +78,265 @@ def fetch_last_email():
 
                     # Decodificar el asunto
                     subject = decode_header(msg["Subject"])[0][0]
-                    subject = subject.decode() if isinstance(subject, bytes) else subject
+                    if isinstance(subject, bytes):
+                        subject = subject.decode(errors="ignore")
+                    
+                    # Normalizar el asunto
+                    normalized_subject = normalize_text(subject)
+                    
+                    # Si el asunto coincide, extraer el contenido
+                    if subject_filter in normalized_subject:
+                        email_body = {"from": msg["From"], "subject": subject, "content": ""}
+                        
+                        # Extraer el cuerpo del mensaje
+                        if msg.is_multipart():
+                            for part in msg.walk():
+                                content_type = part.get_content_type()
+                                if content_type == "text/html" or content_type == "text/html":
+                                    email_body["content"] = part.get_payload(decode=True).decode(errors="ignore")
+                                    return email_body
+                        else:
+                            email_body["content"] = msg.get_payload(decode=True).decode(errors="ignore")
+                            return email_body
 
-                    # Comprobar si el asunto está permitido
-                    if subject not in allowed_subjects:
-                        continue
-
-                    # Decodificar remitente
-                    sender = decode_header(msg["From"])[0][0]
-                    sender = sender.decode() if isinstance(sender, bytes) else sender
-
-                    # Extraer la fecha
-                    date = msg["Date"]
-
-                    # Extraer el cuerpo del correo
-                    body = ""
-                    if msg.is_multipart():
-                        html_body = None
-                        plain_body = None
-                        for part in msg.walk():
-                            content_type = part.get_content_type()
-                            content_disposition = str(part.get("Content-Disposition"))
-
-                            # Si es HTML, lo guardamos como prioridad
-                            if content_type == "text/html" and "attachment" not in content_disposition:
-                                payload = part.get_payload(decode=True)
-                                if payload:
-                                    encoding = chardet.detect(payload)['encoding']
-                                    html_body = payload.decode(encoding or 'utf-8', errors="ignore")
-
-                            # Si es texto plano, lo guardamos como alternativa
-                            elif content_type == "text/plain" and "attachment" not in content_disposition:
-                                payload = part.get_payload(decode=True)
-                                if payload:
-                                    encoding = chardet.detect(payload)['encoding']
-                                    plain_body = payload.decode(encoding or 'utf-8', errors="ignore")
-
-                        # Usar HTML si está disponible, de lo contrario usar texto plano
-                        body = html_body if html_body else plain_body
-                    else:
-                        payload = msg.get_payload(decode=True)
-                        if payload:
-                            encoding = chardet.detect(payload)['encoding']
-                            body = payload.decode(encoding or 'utf-8', errors="ignore")
-
-                    # Cerrar la conexión y devolver el último correo que coincide
-                    mail.logout()
-                    return {
-                        "subject": subject,
-                        "sender": sender,
-                        "date": date,
-                        "body": body
-                    }
-
-        # Cerrar la conexión si no hay coincidencias
         mail.logout()
+        print("No se encontró ningún correo con el asunto especificado.")
         return None
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {str(e)}")
         return None
+
 
 def client_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'client_id' not in session:
-            flash("Ingresa tu ID y numero de telefono para continuar.", "danger")
-            return redirect(url_for('codigos'))
+            flash("Ingresa tu Codigo de Activacion y numero de telefono para continuar.", "danger")
+            return redirect(url_for('activar'))
         return f(*args, **kwargs)
     return decorated_function
 
 @app.route("/codigosdc")
 @client_required
 def codigosdc():
-    """Página principal para mostrar el último correo."""
-    email_data = fetch_last_email()
-    session.pop('client_id', None)
-    # HTML dinámico incrustado
-    html_template = """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Inbox - Streamplus</title>
-    </head>
-    <body>
-        <h1>Bandeja de Entrada</h1>
-        <button onclick="window.location.href='/codigos'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-         Volver
-         </button>
+    numero_telefono = session.get('client_id')
+    idventa = session.get('idventa')
 
-        {% if email_data %}
-        <div class="email-container">
-            <div class="email-header">
-                <p><strong>Remitente:</strong> {{ email_data.sender }}</p>
-                <p><strong>Asunto:</strong> {{ email_data.subject }}</p>
-                <p><strong>Fecha:</strong> {{ email_data.date }}</p>
-            </div>
-           
-                {{ email_data.body | safe }}
-            </div>
-        </div>
-        {% else %}
-        <p>No se encontró ningún correo.</p>
-        {% endif %}
-    </body>
-    </html>
-    """
-    return render_template_string(html_template, email_data=email_data)
+    db = connect_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Verificar si el número de teléfono existe en clientes
+    cursor.execute("SELECT * FROM clientes WHERE numero = %s", (numero_telefono,))
+    cliente = cursor.fetchone()
+
+    if not cliente:
+        flash("Número de teléfono no encontrado en la base de datos.", "danger")
+        return redirect(url_for('activar'))
+
+    # Obtener datos de la venta y la cuenta
+    cursor.execute(""" 
+        SELECT 
+            v.*, 
+            cuentas.correoc, 
+            cuentas.password, 
+            v.tipocuenta
+        FROM ventas v
+        JOIN cuentas cuentas ON v.cuenta_disponible = cuentas.id 
+            AND v.tipocuenta = cuentas.tipocuenta
+        WHERE v.id = %s 
+          AND v.cliente LIKE CONCAT(%s, ' %%')
+    """, (idventa, cliente['id']))
+
+    venta = cursor.fetchone()
+
+    if not venta:
+        flash("No se encontró una venta asociada a este cliente.", "danger")
+        return redirect(url_for('activar'))
+
+    # Definir los asuntos según el tipo de cuenta
+    allowed_subjects = {
+        "netflix": "Netflix: Tu código de inicio de sesión",
+        "disney": "¿Vas a actualizar tu Hogar de Disney+?"
+    }
+    subject_filter = allowed_subjects.get(venta["tipocuenta"].lower(), "ALL")
+
+    # Obtener el correo más reciente
+    email_data = fetch_latest_email(venta["correoc"], venta["password"], subject_filter)
+    
+    session.pop('client_id', None)
+
+    return render_template('codigosdc.html', email_data=email_data)
+
+
+
 #---------------------------------------------------------------------------------------------------------
 
 
 
-@app.route('/codigos', methods=['GET', 'POST'])
-def codigos():
+@app.route('/activar', methods=['GET', 'POST'])
+def activar():
     if request.method == 'POST':
         cliente_id = request.form['id']
         numero_telefono = request.form['telefono']
+        dispositivo = request.form['dispositivo']
 
-        # Verificar datos en la base de datos
         db = connect_db()
         cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM clientes WHERE id = %s AND numero = %s AND activacion > 0", (cliente_id, numero_telefono))
+        cursor.execute("SELECT * FROM ventas WHERE id = %s", (cliente_id,))
+        ventas = cursor.fetchone()
+        cursor.execute("SELECT * FROM clientes WHERE numero = %s AND activacion > 0", (numero_telefono,))
         cliente = cursor.fetchone()
 
-        if cliente:
-            session['client_id'] = cliente_id
-            # Restar 1 en la columna activacion
-            cursor.execute("UPDATE clientes SET activacion = activacion - 1 WHERE id = %s", (cliente_id,))
+        if ventas and cliente:
+            session['idventa'] = cliente_id
+            session['client_id'] = numero_telefono
+            cursor.execute("UPDATE clientes SET activacion = activacion - 1 WHERE numero = %s", (numero_telefono,))
             db.commit()
-            return redirect(url_for('codigosdc'))
+            db.close()
+            
+            if dispositivo == "Celular":
+                return redirect(url_for('codigos'))
+            elif dispositivo == "TV":
+                return redirect(url_for('activartv'))
         else:
             db.close()
             flash("ID o número de teléfono incorrectos, o no tienes activaciones disponibles.", "danger")
-            return redirect(url_for('codigos'))
+            return redirect(url_for('activar'))
+    
+    return render_template('activar.html')
 
-    return render_template('codigos.html')
+@app.route('/codigos', methods=['GET', 'POST'])
+@client_required
+def codigos():
+    numero_telefono = session.get('client_id')
+    idventa = session.get('idventa')
+    db = connect_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT 
+            v.*, 
+            cuentas.correoc, 
+            cuentas.password, 
+            v.tipocuenta
+        FROM ventas v
+        JOIN clientes c ON c.numero = %s
+        JOIN cuentas cuentas ON v.cuenta_disponible = cuentas.id 
+            AND v.tipocuenta = cuentas.tipocuenta
+        WHERE v.id = %s 
+          AND v.cliente LIKE CONCAT(c.id, ' %%')
+    """, (numero_telefono, idventa))
+    ventas = cursor.fetchone()
+    db.close()
+        
+    if not ventas:
+        flash("Datos incorrectos o no encontrados.", "danger")
+        return redirect(url_for('activar'))
+        
+    return render_template('codigos.html', ventas=ventas)
 
+def activate_netflix_tv(codigo_tv, email, password):
+    if 'client_id' not in session:
+        flash("Ingresa tu Codigo de Activacion y numero de telefono para continuar.", "danger")
+        return redirect(url_for('activar'))
+    options = webdriver.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--headless")  # (sin ventana)
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-features=VizDisplayCompositor")
+    driver = webdriver.Chrome(options=options)
+    wait = WebDriverWait(driver, 5)  # Espera hasta 5 segundos si es necesario
+    
+    try:
+        # Acceder a la página de activación
+        driver.get("https://www.netflix.com/tv8")
+        time.sleep(3)
+        
+        # Ingresar el código en los campos individuales
+        for i, digit in enumerate(codigo_tv):
+            input_field = driver.find_element(By.CSS_SELECTOR, f'input[data-uia="pin-number-{i}"]')
+            input_field.send_keys(digit)
+            time.sleep(0.5)  # Pequeña pausa para estabilidad
+            
+        # Presionar Enter o hacer clic en el botón de continuar
+        input_field.send_keys(Keys.RETURN)
+        time.sleep(3)
+        
+        # Esperar hasta que los campos de inicio de sesión sean visibles
+        email_input = driver.find_element(By.NAME, "userLoginId")
+        password_input = driver.find_element(By.NAME, "password")
+        login_button = driver.find_element(By.CSS_SELECTOR, "button[data-uia='login-submit-button']")
+        email_input.send_keys(email)
+        password_input.send_keys(password)
+        login_button.click()
+        time.sleep(5)
+        # Cerrar sesión después de la activación
+        signout_link = driver.find_element(By.CSS_SELECTOR, "a[data-uia='header-signout-link']")
+        signout_link.click()
+        time.sleep(3)
+
+        session.pop('client_id', None)
+        
+        return "Activación completada exitosamente"
+    
+    except Exception as e:
+        return f"Error en la activación"
+    
+    finally:
+        driver.quit()
+
+
+@app.route('/activartv', methods=['GET', 'POST'])
+@client_required
+def activartv():
+    if request.method == 'POST':
+        codigo_tv = request.form['codigo_tv']
+        numero_telefono = session.get('client_id')
+        idventa = session.get('idventa')
+        
+        if not numero_telefono:
+            flash("Sesión expirada. Vuelve a intentarlo.", "danger")
+            return redirect(url_for('activar'))
+        
+        db = connect_db()
+        cursor = db.cursor(dictionary=True)
+        # Obtener ID del cliente
+        cursor.execute("SELECT id FROM clientes WHERE numero = %s", (numero_telefono,))
+        cliente = cursor.fetchone()
+
+        if not cliente:
+            flash("Número de teléfono no encontrado en la base de datos.", "danger")
+            db.close()
+            return redirect(url_for('activar'))
+
+        # Obtener cuenta según la idventa
+        cursor.execute("""
+            SELECT v.*, c.correoc, c.password2, v.tipocuenta
+            FROM ventas v
+            JOIN cuentas c ON v.cuenta_disponible = c.id 
+                AND v.tipocuenta = c.tipocuenta
+            WHERE v.id = %s 
+              AND v.cliente LIKE CONCAT(%s, ' %%')
+        """, (idventa, cliente['id']))
+        cuenta = cursor.fetchone()
+        db.close()
+
+        if cuenta:
+            email = cuenta['correoc']
+            password = cuenta['password2']
+
+        if not email or not password:
+            flash("Error: Credenciales no encontradas.", "danger")
+            session.pop('client_id', None)
+            return redirect(url_for('activar'))
+
+        resultado = activate_netflix_tv(codigo_tv, email, password)
+        session.pop('client_id', None)
+        flash(resultado, "success" if "exitosamente" in resultado else "danger")
+        return redirect(url_for('activar'))
+    
+    return render_template('activartv.html')
 
 
 
@@ -222,7 +358,7 @@ def send_verification_email(email, code):
 
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
         server.starttls()
-        server.login('streamplus504hn@gmail.com', 'jzqj pyhr anxg gelj')
+        server.login('streamplus504hn@gmail.com', 'ilne eurm nllf lrvd')
         server.sendmail(msg['From'], [msg['To']], msg.as_string())
 
 # Función para enviar un correo para cambio de contraseña
@@ -313,7 +449,7 @@ def settings():
     username = session['username']
 
     # Obtener los datos del usuario
-    cursor.execute("SELECT nombre_usuario, numero_telefono, correo_electronico, codigo_referido, saldo FROM usuarios WHERE nombre_usuario = %s", (username,))
+    cursor.execute("SELECT nombre, apellido, nombre_usuario, numero_telefono, correo_electronico, codigo_referido, saldo FROM usuarios WHERE nombre_usuario = %s", (username,))
     user_data = cursor.fetchone()
     db.close()
 
@@ -333,10 +469,21 @@ def check_credentials(username, password):
         session['rol'] = user[1]
         session.permanent = True
         session['verificado'] = user[2]
-        if 'verificado' in session ==0:
+        if 'verificado' in session == 0:
             session.pop('username', None)
         return True
     return False
+
+@app.route('/check_username', methods=['GET'])
+def check_username():
+    db = connect_db()
+    cursor = db.cursor()
+    username = request.args.get('username').lower().replace(' ', '')
+    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = %s", (username,))
+    result = cursor.fetchone()
+    db.close()
+    disponible = result[0] == 0
+    return jsonify({'disponible': disponible})
 
 
 def login_required(f):
@@ -358,7 +505,7 @@ def admin_required(f):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'username' in session and 'verificado' in session== True:
+    if 'username' in session:
         return redirect(url_for('streamplus'))
     
     if request.method == 'POST':
@@ -400,9 +547,11 @@ def logout():
 # Ruta de Registro
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'username' in session and 'verificado' in session== True:
+    if 'username' in session:
         return redirect(url_for('streamplus'))
     if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
         nombre_usuario = request.form['nombre_usuario']
         contraseña = request.form['password']
         numero_telefono = request.form['numero_telefono']
@@ -416,8 +565,8 @@ def register():
 
         db = connect_db()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO usuarios (nombre_usuario, contraseña, numero_telefono, correo_electronico, codigo_referido, rol, codigo_verificacion, verificado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                       (nombre_usuario, contraseña, numero_telefono, correo_electronico, codigo_referido, rol, codigo_verificacion, False))
+        cursor.execute("INSERT INTO usuarios (nombre, apellido, nombre_usuario, contraseña, numero_telefono, correo_electronico, codigo_referido, rol, codigo_verificacion, verificado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                       (nombre, apellido, nombre_usuario, contraseña, numero_telefono, correo_electronico, codigo_referido, rol, codigo_verificacion, False))
         db.commit()
         db.close()
 
@@ -630,14 +779,14 @@ def admin():
     retiros = cursor.fetchall()
 
     # Notificaciones de cuentas expiradas
-    cursor.execute("SELECT id, correoc FROM cuentas WHERE fechav <= %s", (today,))
+    cursor.execute("SELECT id, correoc FROM cuentas WHERE fechav <= %s and estado = 'activa'", (today,))
     cuentas_expiradas = cursor.fetchall()
 
     # Crear lista de notificaciones
     notificaciones = []
     for cliente in clientes_a_renovar:
         link = url_for('ver_renovaciones')
-        notificaciones.append({'mensaje': f"Cliente {cliente[1]} (ID: {cliente[0]}) debe renovar", 'link': link})
+        notificaciones.append({'mensaje': f"Renovacion Pendiente Cliente: {cliente[1]} (ID: {cliente[0]})", 'link': link})
     for cuenta in cuentas_expiradas:
         link = url_for('ver_cuentas')
         notificaciones.append({'mensaje': f"Renovación de cuenta ID: {cuenta[0]} pendiente", 'link': link})
@@ -667,6 +816,24 @@ def ver_cuentas():
     cuentas = cursor.fetchall()
     db.close()
     return render_template('ver_cuentas.html', cuentas=cuentas)
+
+# Ruta para eliminar una cuenta
+@app.route('/eliminar_cuenta/<int:cuenta_id>', methods=['POST'])
+@admin_required
+def eliminar_cuenta(cuenta_id):
+    db = connect_db()
+    cursor = db.cursor()
+    try:
+        cursor.execute("DELETE FROM cuentas WHERE id = %s", (cuenta_id,))
+        db.commit()
+        flash("Cuenta eliminada correctamente.", "success")
+    except Exception as e:
+        db.rollback()
+        flash("Error al eliminar la cuenta: " + str(e), "danger")
+    finally:
+        db.close()
+    return redirect(url_for('ver_cuentas'))
+
 
 # Ruta para ver clientes
 @app.route('/ver_clientes', methods=['GET', 'POST'])
@@ -708,16 +875,18 @@ def agregar_cuenta():
     if request.method == 'POST':
         tipo_cuenta = request.form['tipo_cuenta']
         correoc = request.form['correoc']
+        password2 = request.form['password2']
         password = request.form['password']
         fechac = request.form['fechac']
         fechav = request.form['fechav']
         perfiles = request.form['perfiles']
         inversion = request.form['inversion']
+        estado = "activa"
 
         db = connect_db()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO cuentas (tipocuenta, correoc, password, fechac, fechav, perfiles, inversion) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
-                       (tipo_cuenta, correoc, password, fechac, fechav, perfiles, inversion))
+        cursor.execute("INSERT INTO cuentas (tipocuenta, correoc, password, fechac, fechav, perfiles, inversion, estado, password2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                       (tipo_cuenta, correoc, password, fechac, fechav, perfiles, inversion, estado, password2))
         db.commit()
         db.close()
         flash('Cuenta agregada exitosamente', 'success')
@@ -733,10 +902,11 @@ def agregar_cliente():
         nombre = request.form['nombre']
         numero = request.form['numero']
         referido = session.get('referido')
+        activacion = request.form['activacion']
 
         db = connect_db()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO clientes (nombre, numero, referido) VALUES (%s, %s, %s)", (nombre, numero, referido))
+        cursor.execute("INSERT INTO clientes (nombre, numero, referido, activacion) VALUES (%s, %s, %s, %s)", (nombre, numero, referido, activacion))
         db.commit()
         db.close()
         flash('Cliente agregado exitosamente', 'success')
@@ -835,7 +1005,7 @@ def obtener_cuentas_disponibles():
 def obtener_cuentas_disponibles_por_tipo(tipo_cuenta):
     db = connect_db()
     cursor = db.cursor()
-    cursor.execute("SELECT correoc,id,perfiles FROM cuentas WHERE tipocuenta = %s AND perfiles BETWEEN 1 AND 8", (tipo_cuenta,))
+    cursor.execute("SELECT correoc,id,perfiles FROM cuentas WHERE tipocuenta = %s AND estado = 'activa' AND perfiles BETWEEN 1 AND 8", (tipo_cuenta,))
     cuentas_disponibles = cursor.fetchall()
     db.close()
     return [cuenta for cuenta in cuentas_disponibles] 
@@ -858,6 +1028,7 @@ def agregar_ventas_multiples():
             detalles_ventas = []
 
             for venta in ventas:
+                id = venta['id']
                 tipo_cuenta = venta['tipo_cuenta']
                 cuenta_disponible = venta['cuenta_disponible']
                 fechaini = datetime.strptime(venta['fechaini'], '%Y-%m-%d')
@@ -871,11 +1042,12 @@ def agregar_ventas_multiples():
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, (cliente, tipo_cuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion))
 
-                # Restar perfiles en la cuenta
+                # Restar perfiles en la cuentas
                 restar_perfil(cuenta_disponible)
 
                 total_monto += monto
                 detalles_ventas.append({
+                    'id': id,
                     'tipo_cuenta': tipo_cuenta,
                     'cuenta_disponible': cuenta_disponible,
                     'fechaini': fechaini.strftime('%Y-%m-%d'),
@@ -888,7 +1060,7 @@ def agregar_ventas_multiples():
 
             # Generar factura consolidada
             factura_id = generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas)
-
+            flash('Venta realizada exitosamente', 'success')
             return jsonify({
                 'message': 'Ventas agregadas exitosamente',
                 'factura_url': f'/factura_{factura_id}'
@@ -907,7 +1079,7 @@ def agregar_ventas_multiples():
     cuentas_disponibles = obtener_cuentas_disponibles()
 
     return render_template(
-        'agregar_ventas_multiples.html',
+        'agregar_ventas_multiples.html', next_id=get_next_id('ventas'),
         clientes=clientes,
         tipos_cuenta=tipos_cuenta,
         cuentas_disponibles=cuentas_disponibles
@@ -950,7 +1122,7 @@ def generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas):
     draw.text((350, 250), "Email: admin@streamplushn.com", font=font_bold, fill=(0, 0, 0))
 
     # Datos de la factura
-    draw.text((50, 350), f"Factura ID: {factura_id}", font=font_bold, fill=(0, 0, 0))
+    draw.text((50, 350), f"Factura #: {factura_id}", font=font_bold, fill=(0, 0, 0))
     draw.text((50, 425), "Fecha de Emisión:", font=font_bold, fill=(0, 0, 0))
     draw.text((450, 425), f"{datetime.now().strftime('%Y-%m-%d')}", font=font_medium, fill=(0, 0, 0))
     draw.text((50, 500), "Cliente:", font=font_bold, fill=(0, 0, 0))
@@ -966,11 +1138,12 @@ def generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas):
     # Dibujar cada venta
     for i, venta in enumerate(detalles_ventas, start=1):
         draw.text((50, y_offset), f"{i}. Tipo de Cuenta: {venta['tipo_cuenta']}", font=font_bold, fill=(0, 0, 0))
-        draw.text((50, y_offset + 50), f"   ID Cuenta: {venta['cuenta_disponible']}", font=font_smallc, fill=(0, 0, 0))
-        draw.text((50, y_offset + 100), f"   Fecha de Inicio: {venta['fechaini']}", font=font_small, fill=(0, 0, 0))
-        draw.text((50, y_offset + 150), f"   Vence: {venta['fechaexp']}", font=font_small, fill=(0, 0, 0))
-        draw.text((50, y_offset + 200), f"   Monto: {venta['monto']:.2f} L", font=font_small, fill=(0, 0, 0))
-        y_offset += 250
+        draw.text((50, y_offset + 50), f"   ID de Activacion: {venta['id']}", font=font_bold, fill=(0, 0, 0))
+        draw.text((50, y_offset + 100), f"   Cuenta: {venta['cuenta_disponible']}", font=font_small, fill=(0, 0, 0))
+        draw.text((50, y_offset + 150), f"   Fecha de Inicio: {venta['fechaini']}", font=font_small, fill=(0, 0, 0))
+        draw.text((50, y_offset + 200), f"   Vence: {venta['fechaexp']}", font=font_small, fill=(0, 0, 0))
+        draw.text((50, y_offset + 250), f"   Monto: {venta['monto']:.2f} L", font=font_small, fill=(0, 0, 0))
+        y_offset += 300
 
     # Guardar imagen
     factura_dir = os.path.join(os.getcwd(), "facturas")
@@ -1044,54 +1217,80 @@ def ver_ingresos():
                            ventas_streamplus_anual=ventas_streamplus_anual)
 
 
-#Ruta Agregar Pedido
 @app.route('/agregar_pedido', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def agregar_pedido():
     if request.method == 'POST':
-        cliente = request.form['cliente']
-        tipo_cuenta = request.form['tipo_cuenta']
-        cuenta_disponible = request.form['cuenta_disponible']
-        fechaini = datetime.strptime(request.form['fechaini'], '%Y-%m-%d')
-        dias = int(request.form['dias'])
-        fechaexp = fechaini + timedelta(days=dias)
-        monto = float(request.form['monto'])
-        inversion = get_inversion(cuenta_disponible,tipo_cuenta)
-        user_id = session['user_id']
-        # obtener referido
-        db = connect_db()
-        cursor = db.cursor()
-        cursor.execute("SELECT codigo_referido FROM usuarios WHERE id = %s", (user_id,))
-        referido = cursor.fetchone()[0]
-
-        gananciaref = "0.00"
-
-        if dias == 60:
-                inversion *= 2
-                ganancia = monto - inversion
-        elif dias == 90:
-                inversion *= 3
-                ganancia = monto - inversion
-        gananciaref = (monto - inversion) * PORCENTAJE_REFERIDO
+        data = request.json
+        cliente = data.get('cliente')
+        ventas = data.get('ventas', [])
+        if not cliente or not ventas:
+            return jsonify({'error': 'Datos incompletos'}), 400
 
         db = connect_db()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO pedidos (cliente, tipocuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion, referido, gananciaref) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
-                       (cliente, tipo_cuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion, referido, gananciaref))
-        db.commit()
-        db.close()
 
-        flash('Pedido agregado exitosamente', 'success')
-        return redirect(url_for('agregar_pedido'))
+        try:
+            total_monto = 0
+            detalles_ventas = []
 
-    # Obtener datos necesarios para el formulario
+            for venta in ventas:
+                id = venta['id']
+                tipo_cuenta = venta['tipo_cuenta']
+                cuenta_disponible = venta['cuenta_disponible']
+                fechaini = datetime.strptime(venta['fechaini'], '%Y-%m-%d')
+                dias = int(venta['dias'])
+                fechaexp = fechaini + timedelta(days=dias)
+                monto = float(venta['monto'])
+                inversion = get_inversion(cuenta_disponible, tipo_cuenta)
+
+                cursor.execute("""
+                    INSERT INTO ventas (cliente, tipocuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (cliente, tipo_cuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion))
+
+                # Restar perfiles en la cuentas
+                restar_perfil(cuenta_disponible)
+
+                total_monto += monto
+                detalles_ventas.append({
+                    'id': id,
+                    'tipo_cuenta': tipo_cuenta,
+                    'cuenta_disponible': cuenta_disponible,
+                    'fechaini': fechaini.strftime('%Y-%m-%d'),
+                    'dias': dias,
+                    'fechaexp': fechaexp.strftime('%Y-%m-%d'),
+                    'monto': monto
+                })
+
+            db.commit()
+
+            # Generar factura consolidada
+            factura_id = generar_factura_multiples_ventas(cliente, total_monto, detalles_ventas)
+            flash('Venta realizada exitosamente', 'success')
+            return jsonify({
+                'message': 'Ventas agregadas exitosamente',
+                'factura_url': f'/factura_{factura_id}'
+            }), 200
+
+        except Exception as e:
+            db.rollback()
+            return jsonify({'error': f'Error al procesar ventas: {e}'}), 500
+
+        finally:
+            db.close()
+
+    # En caso de GET, renderizar la página con los datos necesarios
     clientes = obtener_clientes()
     tipos_cuenta = ["netflix", "disneyplus", "max", "spotify", "youtube", "primevideo"]
     cuentas_disponibles = obtener_cuentas_disponibles()
 
-    next_id = get_next_id('ventas')
-
-    return render_template('agregar_pedido.html', next_id=next_id, clientes=clientes, tipos_cuenta=tipos_cuenta, cuentas_disponibles=cuentas_disponibles)
+    return render_template(
+        'agregar_pedido.html', next_id=get_next_id('ventas'),
+        clientes=clientes,
+        tipos_cuenta=tipos_cuenta,
+        cuentas_disponibles=cuentas_disponibles
+    )
 
 
 @app.route('/ver_ventas_usuario')
@@ -1145,7 +1344,7 @@ def ver_renovaciones():
     db = connect_db()
     cursor = db.cursor()
     today = datetime.now().date()
-    cursor.execute("SELECT v.id, v.cliente, v.tipocuenta, v.cuenta_disponible, v.fechaini, v.fechaexp, c.nombre, c.numero "
+    cursor.execute("SELECT v.id, v.cliente, v.tipocuenta, v.cuenta_disponible, v.fechaini, v.fechaexp, v.referido, c.nombre, c.numero "
                    "FROM ventas v JOIN clientes c ON v.cliente = c.id WHERE v.fechaexp <= %s AND (v.estado IS NULL OR v.estado = '')", (today,))
     renovaciones = cursor.fetchall()
     db.close()
@@ -1214,42 +1413,70 @@ def ver_pedidos():
 
 
 # Ruta para renovar una venta
-@app.route('/renovar_venta/<int:venta_id>', methods=['POST'])
+@app.route('/renovar_venta/<int:venta_id>', methods=['GET', 'POST'])
 @admin_required
 def renovar_venta(venta_id):
-    dias = int(request.form['dias'])
-    fechaini = datetime.now().date()
-    fechaexp = fechaini + timedelta(days=dias)
-
     db = connect_db()
     cursor = db.cursor()
-    cursor.execute("SELECT cliente, tipocuenta, cuenta_disponible, monto, inversion, referido, gananciaref FROM ventas WHERE id = %s", (venta_id,))
-    venta = cursor.fetchone()
 
-    cursor.execute("INSERT INTO ventas (cliente, tipocuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion, referido, gananciaref) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
-                   (venta[0], venta[1], venta[2], fechaini, dias, fechaexp, venta[3], venta[4], venta[5], venta[6]))
-    
-    # Sumar ganancia al saldo del usuario
-    if venta[5]:
-        referido_id = venta[5]
-        gananciaref = float(venta[6])
+    if request.method == 'POST':
+        # Procesar el formulario enviado por el usuario
+        dias = int(request.form['dias'])
+        fechaini = datetime.strptime(request.form['fechaini'], '%Y-%m-%d')
+        fechaexp = fechaini + timedelta(days=dias)
 
-        # Obtener el saldo actual del usuario
-        cursor.execute("SELECT saldo FROM usuarios WHERE codigo_referido = %s", (referido_id,))
-        referido = cursor.fetchone()
+        # Consultar datos de la venta a renovar
+        cursor.execute(
+            "SELECT cliente, tipocuenta, cuenta_disponible, monto, inversion, referido, gananciaref FROM ventas WHERE id = %s",
+            (venta_id,)
+        )
+        venta = cursor.fetchone()
 
-        if referido:
-            nuevo_saldo = referido[0] + gananciaref
+        if not venta:
+            flash('La venta no existe o ya fue renovada.', 'error')
+            return redirect(url_for('ver_renovaciones'))
 
-            # Actualizar el saldo del usuario
-            cursor.execute("UPDATE usuarios SET saldo = %s WHERE codigo_referido = %s", (nuevo_saldo, referido_id))
+        # Insertar la nueva venta renovada
+        cursor.execute(
+            "INSERT INTO ventas (cliente, tipocuenta, cuenta_disponible, fechaini, dias, fechaexp, monto, inversion, referido, gananciaref) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (venta[0], venta[1], venta[2], fechaini, dias, fechaexp, venta[3], venta[4], venta[5], venta[6])
+        )
 
-    cursor.execute("UPDATE ventas SET estado = 'renovado' WHERE id = %s", (venta_id,))
-    db.commit()
-    db.close()
+        # Actualizar estado de la venta original
+        cursor.execute("UPDATE ventas SET estado = 'renovado' WHERE id = %s", (venta_id,))
+        db.commit()
+        db.close()
 
-    flash('Venta renovada exitosamente', 'success')
-    return redirect(url_for('ver_renovaciones'))
+        flash('Venta renovada exitosamente', 'success')
+        return redirect(url_for('ver_renovaciones'))
+
+    else:
+        # Consultar datos de la venta para mostrar en el formulario
+        cursor.execute(
+            "SELECT cliente, tipocuenta, cuenta_disponible, monto, inversion, referido, ganancia, gananciaref FROM ventas WHERE id = %s",
+            (venta_id,)
+        )
+        venta = cursor.fetchone()
+        db.close()
+
+        if not venta:
+            flash('Venta no encontrada.', 'error')
+            return redirect(url_for('ver_renovaciones'))
+
+        # Renderizar el formulario HTML
+        return render_template('renovar_venta.html', venta={
+            'id': venta_id,
+            'cliente': venta[0],
+            'tipocuenta': venta[1],
+            'cuenta_disponible': venta[2],
+            'fechaini': datetime.now().date(),
+            'monto': venta[3],
+            'inversion': venta[4],
+            'referido': venta[5],
+            'ganancia': venta[6],
+            'gananciaref': venta[7],
+        })
+
 
 # Ruta para marcar como no renovado
 @app.route('/no_renovo/<int:venta_id>', methods=['POST'])
@@ -1281,15 +1508,16 @@ def editar_cuenta(cuenta_id):
         fechav = request.form['fechav']
         perfiles = request.form['perfiles']
         inversion = request.form['inversion']
+        estado = request.form['estado']
 
-        cursor.execute("UPDATE cuentas SET tipocuenta=%s, correoc=%s, password=%s, fechac=%s, fechav=%s, perfiles=%s, inversion=%s WHERE id=%s", 
-                       (tipo_cuenta, correoc, password, fechac, fechav, perfiles, inversion, cuenta_id))
+        cursor.execute("UPDATE cuentas SET tipocuenta=%s, correoc=%s, password=%s, fechac=%s, fechav=%s, perfiles=%s, inversion=%s, estado=%s WHERE id=%s", 
+                       (tipo_cuenta, correoc, password, fechac, fechav, perfiles, inversion, estado, cuenta_id))
         db.commit()
         db.close()
         flash('Cuenta actualizada exitosamente', 'success')
         return redirect(url_for('ver_cuentas'))
 
-    cursor.execute("SELECT id, tipocuenta, correoc, password, fechac, fechav, perfiles, inversion FROM cuentas WHERE id=%s", (cuenta_id,))
+    cursor.execute("SELECT id, tipocuenta, correoc, password, fechac, fechav, perfiles, inversion, estado FROM cuentas WHERE id=%s", (cuenta_id,))
     cuenta = cursor.fetchone()
     db.close()
     return render_template('editar_cuenta.html', cuenta=cuenta)
@@ -1470,6 +1698,93 @@ def obtener_venta_por_id(venta_id):
         }
     return None
 
+
+
+# Ruta al archivo JSON donde se guardan los pedidos
+TEMPLATES_FOLDER = "templates"
+ORDERS_FILE = os.path.join(TEMPLATES_FOLDER, "orders.json")
+
+# Asegurarse de que la carpeta y el archivo existen
+if not os.path.exists(TEMPLATES_FOLDER):
+    os.makedirs(TEMPLATES_FOLDER)  # Crear la carpeta templates si no existe
+
+if not os.path.exists(ORDERS_FILE):
+    with open(ORDERS_FILE, "w") as f:
+        json.dump([], f)  # Crear el archivo orders.json con una lista vacía
+
+
+
+@app.route("/cart")
+def carrito():
+    """Página de confirmación del carrito."""
+    return render_template("cart.html")
+
+
+@app.route("/pedidos_cliente")
+def ver_pedidos2():
+    """Página para ver todos los pedidos."""
+    return render_template("orders.html")
+
+
+@app.route("/save_order", methods=["POST"])
+def guardar_pedido2():
+    """Guardar un nuevo pedido en el archivo JSON."""
+    try:
+        # Leer el pedido enviado desde el cliente
+        pedido = request.get_json()
+
+        # Leer los pedidos existentes
+        with open(ORDERS_FILE, "r") as f:
+            pedidos = json.load(f)
+
+        # Agregar el nuevo pedido a la lista
+        pedidos.append(pedido)
+
+        # Guardar los pedidos de nuevo en el archivo
+        with open(ORDERS_FILE, "w") as f:
+            json.dump(pedidos, f, indent=4)
+
+        return jsonify({"message": "Pedido guardado con éxito"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/delete_order", methods=["POST"])
+def eliminar_pedido2():
+    """Eliminar un pedido basado en su ID."""
+    try:
+        # Leer el ID enviado desde el cliente
+        data = request.get_json()
+        pedido_id = data.get("id")
+
+        # Leer los pedidos existentes
+        with open(ORDERS_FILE, "r") as f:
+            pedidos = json.load(f)
+
+        # Filtrar los pedidos para eliminar el seleccionado
+        pedidos = [pedido for pedido in pedidos if pedido["id"] != pedido_id]
+
+        # Guardar los pedidos actualizados
+        with open(ORDERS_FILE, "w") as f:
+            json.dump(pedidos, f, indent=4)
+
+        return jsonify({"message": "Pedido eliminado con éxito"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/orders.json")
+def obtener_pedidos2():
+    """Retornar los pedidos en formato JSON."""
+    try:
+        with open(ORDERS_FILE, "r") as f:
+            pedidos = json.load(f)
+        return jsonify(pedidos)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 # Ruta para generar la factura y convertirla en PNG
 @app.route('/factura/<int:venta_id>', methods=['GET'])
 def generar_factura(venta_id):
@@ -1538,12 +1853,12 @@ def generar_factura(venta_id):
 
 
 def run_http():
-    app.run(host="0.0.0.0", port=80)  # HTTP (sin cifrado)
+    app.run(host="0.0.0.0", port=80)  
 
 def run_https():
     ssl_context = ("C:\\streamplushn.com\\certificate.crt", "C:\\streamplushn.com\\private.key")
-    app.run(host="0.0.0.0", port=443, ssl_context=ssl_context)  # HTTPS (cifrado)
+    app.run(host="0.0.0.0", port=443, ssl_context=ssl_context)  
 
 if __name__ == "__main__":
-    Thread(target=run_http).start()  # Inicia HTTP
-    Thread(target=run_https).start()  # Inicia HTTPS
+    Thread(target=run_http).start()  
+    Thread(target=run_https).start()  

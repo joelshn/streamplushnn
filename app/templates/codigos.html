@@ -3,31 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Códigos de Netflix y Disney+</title>
+    <title>Detalles</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function copiarCorreo() {
+            var correo = document.getElementById("correoCuenta").innerText;
+            navigator.clipboard.writeText(correo).then(() => {
+                mostrarAlerta("📩 Correo copiado: " + correo);
+            }).catch(err => {
+                mostrarAlerta("❌ Error al copiar el correo", true);
+            });
+        }
+
+        function mostrarAlerta(mensaje, error = false) {
+            var alerta = document.createElement("div");
+            alerta.className = "custom-alert";
+            alerta.style.backgroundColor = error ? "#e74c3c" : "#2ecc71"; // Rojo si es error
+            alerta.innerText = mensaje;
+            
+            document.body.appendChild(alerta);
+            alerta.style.display = "block";
+
+            setTimeout(() => {
+                alerta.style.display = "none";
+                alerta.remove();
+            }, 3000);
+        }
+
+        function activarBoton() {
+            var checkbox = document.getElementById("confirmacion");
+            var boton = document.getElementById("obtenerCodigo");
+            boton.disabled = !checkbox.checked;
+        }
+    </script>
+    <style>
+        .small-button {
+            width: 30%;
+            font-size: 12px;
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .small-button:hover {
+            background-color: #2980b9;
+        }
+
+        .custom-alert {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 20%;
+            right: 20%;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
-    <h1>Ver Códigos de Netflix y Disney+</h1>
-    <br>
-    {% with messages = get_flashed_messages(with_categories=true) %}
+    <div class="container">
+        <h1>Detalles</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
+                <br>
                 <div class="flash-{{ category }}">
                     {{ message }}
                 </div>
+                <br>
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <br>
+        <div class="info-box">
+            <p><strong>Cliente:</strong> {{ ventas.cliente }}</p>
+            <p><strong>Tipo de Cuenta:</strong> {{ ventas.tipocuenta }}</p>
+            <p>
+                <strong>Correo de la Cuenta:</strong> 
+                <span id="correoCuenta">{{ ventas.correoc }}</span> 
+                <button class="small-button" onclick="copiarCorreo()">Copiar</button>
+            </p>
+        </div>
 
-    {% if not cliente %}
-        <form method="post" action="/codigos">
-            <label for="id">ID de Cliente:</label>
-            <input type="text" name="id" id="id" placeholder="Ingresa tu ID" required>
-            <label for="telefono">Número de Teléfono:</label>
-            <input type="text" name="telefono" id="telefono" placeholder="97302756" required>
-            <button type="submit">Ingresar</button>
-        </form>
-    {% endif %}
+        <div class="aviso">
+            <strong class="importante">⚠️ Antes de continuar:</strong>  
+            <ol style="text-align: left;">
+                <li>Abre la aplicación de <strong class="importante">Netflix</strong> en tu dispositivo.</li>
+                <li>Presiona en <strong class="importante">"Usar código de inicio de sesión"</strong>.</li>
+                <li>Ingresa el <strong class="importante">correo</strong> y presiona "Enviar".</li>
+                <li>Solo después de hacer esto, presiona el botón "Obtener Código".</li>
+            </ol>
+        </div>
+
+        <input type="checkbox" id="confirmacion" onchange="activarBoton()">
+        <label for="confirmacion">He seguido los pasos anteriores</label><br><br>
+
+        
+        <button id="obtenerCodigo" onclick="location.href='codigosdc'" disabled>Obtener Código</button>
+        <!-- Contenedor de la rueda de carga -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Obteniendo codigo...</p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("obtenerCodigo").addEventListener("click", function () {
+                // Mostrar la rueda de carga
+                document.getElementById("loading").style.display = "block";
+    
+                // Deshabilitar el botón para evitar múltiples clics
+                document.getElementById("obtenerCodigo").disabled = true;
+    
+                // Redirigir después de un pequeño retraso (para que se vea la carga)
+                setTimeout(() => {
+                    window.location.href = 'codigosdc';
+                }, 1500); // Ajusta el tiempo según sea necesario
+            });
+        });
+    </script>
+    
 </body>
 </html>

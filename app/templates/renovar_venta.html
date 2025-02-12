@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renovar Venta</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Renovar Venta</h1>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+    </div>
+    <div class="container">
+        <form id="renovar" method="POST" action="{{ url_for('renovar_venta', venta_id=venta['id']) }}">
+            <label for="cliente">Cliente:</label>
+            <input type="text" id="cliente" name="cliente" value="{{ venta['cliente'] }}" readonly>
+
+            <label for="tipocuenta">Tipo de Cuenta:</label>
+            <input type="text" id="tipocuenta" name="tipocuenta" value="{{ venta['tipocuenta'] }}" readonly>
+
+            <label for="cuenta_disponible">Cuenta Disponible:</label>
+            <input type="text" id="cuenta_disponible" name="cuenta_disponible" value="{{ venta['cuenta_disponible'] }}" readonly>
+            
+            <label>Fecha de Activación:</label>
+            <input type="date" name="fechaini" id="fechaini" required value="{{ venta['fechaini'] }}">
+            
+            <label>Dias:</label>
+            <select id="dias" name="dias">
+                <option value="30">1 Mes</option>
+                <option value="60">2 Meses</option>
+                <option value="90">3 Meses</option>
+            </select>
+
+            <label for="monto">Monto:</label>
+            <input type="number" step="0.01" id="monto" name="monto" value="{{ venta['monto'] }}" readonly>
+
+            <label for="inversion">Inversión:</label>
+            <input type="number" step="0.01" id="inversion" name="inversion" value="{{ venta['inversion'] }}" readonly>
+
+            <label for="referido">Referido:</label>
+            <input type="text" id="referido" name="referido" value="{{ venta['referido'] }}" readonly>
+            
+            <label for="ganancia">Ganancia:</label>
+            <input type="number" step="0.01" id="ganancia" name="ganancia" value="{{ venta['ganancia'] }}" readonly>
+
+            <label for="gananciaref">Ganancia Referido:</label>
+            <input type="number" step="0.01" id="gananciaref" name="gananciaref" value="{{ venta['gananciaref'] }}" readonly>
+
+            <button type="submit" id="guardar">Renovar</button>
+        </form>
+
+        <!-- Contenedor de la rueda de carga -->
+        <div id="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener los parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+
+        // Obtener el valor del parámetro 'dias'
+        const dias = params.get('dias');
+
+        // Verificar si existe el parámetro 'dias' y asignarlo al select
+        if (dias) {
+            const diasSelect = document.getElementById('dias');
+            diasSelect.value = dias; // Selecciona la opción automáticamente
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#renovar').submit(function () {
+                // Mostrar la rueda de carga y deshabilitar el botón
+                $('#loading').show();
+                $('#guardar').prop('disabled', true);
+
+                // Continuar con el envío del formulario
+                return true;
+            });
+        });
+    </script>
+    <div class="footer">
+        &copy; 2025 StreamPlus
+    </div>
+</body>
+</html>

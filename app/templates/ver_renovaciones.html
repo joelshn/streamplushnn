@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Renovaciones</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -12,7 +13,7 @@
 
     {% block content %}
     <div class="header">
-        <h1>Clientes que deben renovar</h1>
+        <h1>Renovaciones</h1>
         <br>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -24,40 +25,93 @@
             {% endif %}
         {% endwith %}
         <br>
+        <form id="searchForm">
+            <select id="filter">
+                <option disabled="" selected="" value"">Buscar por</option>
+                <option value="id">Buscar por ID</option>
+                <option value="referido">Buscar por Referido</option>
+                <option value="cliente">Buscar por Cliente</option>
+                <option value="tipocuenta">Buscar por Tipo de Cuenta</option>
+                <option value="idcorreo">Buscar por ID Correo</option>
+                
+            </select>
+            <br>
+            <br>
+            <input type="text" id="searchInput" placeholder="Buscar...">
+            <button type="button" class="btn btn-danger" onclick="filterTable()">Buscar</button>
+            <a href='admin' class="btn btn-primary">Volver</a>
+        </form> 
     </div>
-    <div class="container">
+        <div class="table-container"></div>
         <table>
+            <thead>
             <tr>
                 <th>ID</th>
                 <th>Cliente</th>
-                <th>Tipo de Cuenta</th>
+                <th>Cuenta</th>
                 <th>Cuenta Disponible</th>
                 <th>Fecha de Activación</th>
                 <th>Fecha de Expiración</th>
+                <th>Referido</th>
                 <th>Acciones</th>
             </tr>
+        </thead>
+        <tbody>
             {% for renovacion in renovaciones %}
             <tr>
-                <td>{{ renovacion[0] }}</td>
-                <td>{{ renovacion[6] }} ({{ renovacion[7] }})</td>
-                <td>{{ renovacion[2] }}</td>
-                <td>{{ renovacion[3] }}</td>
-                <td>{{ renovacion[4] }}</td>
-                <td>{{ renovacion[5] }}</td>
+                <td data-label="ID">{{ renovacion[0] }}</td>
+                <td data-label="Cliente">{{ renovacion[7] }} ({{ renovacion[8] }})</td>
+                <td data-label="Cuenta">{{ renovacion[2] }}</td>
+                <td data-label="Cuenta Disponible">{{ renovacion[3] }}</td>
+                <td data-label="Activacion">{{ renovacion[4] }}</td>
+                <td data-label="Expiracion">{{ renovacion[5] }}</td>
+                <td data-label="Referido">{{ renovacion[6] }}</td>
                 <td>
-                    <form method="POST" action="{{ url_for('renovar_venta', venta_id=renovacion[0]) }}" style="display:inline;">
+                    <form method="GET" action="{{ url_for('renovar_venta', venta_id=renovacion[0]) }}" style="display:inline;">
                         <input type="number" name="dias" placeholder="Días" required>
-                        <button type="submit">Renovar</button>
+                        <button type="submit" style="background-color: rgb(18, 197, 18);">Renovar</button>
                     </form>
                     <form method="POST" action="{{ url_for('no_renovo', venta_id=renovacion[0]) }}" style="display:inline;">
-                        <button type="submit">No Renovo</button>
+                        <button type="submit">Expulsar</button>
                     </form>
                 </td>
             </tr>
             {% endfor %}
+        </tbody>
         </table>
-        <a href="{{ url_for('admin') }}">Volver</a>
     </div>
+    <script>
+        function filterTable() {
+            let filter = document.getElementById("filter").value;
+            let searchValue = document.getElementById("searchInput").value.toLowerCase();
+            let table = document.querySelector("table");
+            let rows = table.getElementsByTagName("tr");
+    
+            for (let i = 1; i < rows.length; i++) { // Empieza desde 1 para saltar el encabezado
+                let cells = rows[i].getElementsByTagName("td");
+                let cellValue;
+                
+                if (filter === "referido") {
+                    cellValue = cells[6].textContent || cells[6].innerText;
+                } else if (filter === "cliente") {
+                    cellValue = cells[1].textContent || cells[1].innerText;
+                } else if (filter === "tipocuenta") {
+                    cellValue = cells[2].textContent || cells[2].innerText;
+                } else if (filter === "id") {
+                    cellValue = cells[0].textContent || cells[0].innerText;
+                } else if (filter === "idcorreo") {
+                    cellValue = cells[3].textContent || cells[3].innerText;
+                }
+                // Agrega más condiciones para otros filtros
+    
+                if (cellValue.toLowerCase().indexOf(searchValue) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    </script>
     {% endblock %}
 </body>
 </html>

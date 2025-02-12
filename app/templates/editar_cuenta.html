@@ -4,14 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Cuenta</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Estilos para la rueda de carga */
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        #loading .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 6px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 6px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="header">
         <h1>Editar Cuenta</h1>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+        <br>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <br>
     </div>
     <div class="container">
-        <form method="POST">
+        <form id="editar" method="POST">
+            <label for="estado">Estado:</label>
+            <input type="text" id="estado" name="estado" value="{{ cuenta[8] }}" required>
             <label for="tipo_cuenta">Tipo de Cuenta:</label>
             <input type="text" id="tipo_cuenta" name="tipo_cuenta" value="{{ cuenta[1] }}" required>
 
@@ -33,20 +84,26 @@
             <label for="inversion">Inversión:</label>
             <input type="number" step="0.01" id="inversion" name="inversion" value="{{ cuenta[7] }}" required>
 
-            <button type="submit">Actualizar</button>
-            <br>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="flash-{{ category }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            <br>
+            <button type="submit" id="guardar">Actualizar</button>
+            
         </form>
-        <a href="{{ url_for('ver_cuentas') }}">Volver</a>
+        <!-- Contenedor de la rueda de carga -->
+        <div id="loading">
+            <div class="spinner"></div>
+        </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#editar').submit(function (e) {
+                // Mostrar la rueda de carga y deshabilitar el botón
+                $('#loading').show();
+                $('#guardar').prop('disabled', true);
+
+                // Continuar con el envío del formulario
+                return true;
+            });
+        });
+    </script>
     </div>
     <div class="footer">
         &copy; 2024 StreamPlus. Todos los derechos reservados.

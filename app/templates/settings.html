@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración del Usuario</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Agregar Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -27,6 +28,7 @@
         <div class="card mt-4">
             <div class="card-body">
                 <h4>Detalles del Usuario</h4>
+                <p><strong>Nombre:</strong> {{ user_data['nombre'] }} {{ user_data['apellido'] }}</p>
                 <p><strong>Nombre de Usuario:</strong> {{ user_data['nombre_usuario'] }}</p>
                 <p><strong>Número de Teléfono:</strong> {{ user_data['numero_telefono'] }}</p>
                 <p><strong>Correo Electrónico:</strong> {{ user_data['correo_electronico'] }}</p>
@@ -46,6 +48,8 @@
                 <i class="fas fa-key"></i> Cambiar Contraseña
             </a>
         </div>
+        <br>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
     </div>
 
     <!-- Agregar jQuery y Bootstrap -->

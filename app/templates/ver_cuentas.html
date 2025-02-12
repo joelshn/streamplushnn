@@ -4,7 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ver Cuentas</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Estilos adicionales */
+        .btn-danger {
+            color: #fff;
+            background-color: #e74c3c;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
     {% extends "base.html" %}
@@ -13,16 +29,30 @@
     {% block content %}
     <div class="header">
         <h1>Cuentas</h1>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
     </div>
-    <div class="container">
+  
         <form method="POST">
             <input type="text" name="search" placeholder="Buscar...">
             <button type="submit">Buscar</button>
         </form>
+        <div class="table-container"></div>
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Estado</th>
                     <th>Tipo de Cuenta</th>
                     <th>Correo</th>
                     <th>Contraseña</th>
@@ -37,6 +67,7 @@
                 {% for cuenta in cuentas %}
                 <tr>
                     <td data-label="ID">{{ cuenta[0] }}</td>
+                    <td data-label="Estado">{{ cuenta[8] }}</td>
                     <td data-label="Tipo de Cuenta">{{ cuenta[1] }}</td>
                     <td data-label="Correo">{{ cuenta[2] }}</td>
                     <td data-label="Contraseña">{{ cuenta[3] }}</td>
@@ -45,25 +76,97 @@
                     <td data-label="Perfiles">{{ cuenta[6] }}</td>
                     <td data-label="Inversión">{{ cuenta[7] }}</td>
                     <td data-label="Acciones">
-                        <a href="{{ url_for('editar_cuenta', cuenta_id=cuenta[0]) }}">Editar</a>
+                        <a class="btn btn-primary" href="{{ url_for('editar_cuenta', cuenta_id=cuenta[0]) }}">Editar</a>
+                        <button 
+                            class="btn btn-danger" 
+                            onclick="confirmarEliminacion({{ cuenta[0] }})">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <br>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <br>
-        <a href="{{ url_for('admin') }}">Volver</a>
+        
     </div>
+
+    <script>
+        function confirmarEliminacion(cuentaId) {
+            // Crear el contenedor de la alerta
+            const alerta = document.createElement('div');
+            alerta.style.position = 'fixed';
+            alerta.style.top = '0';
+            alerta.style.left = '0';
+            alerta.style.width = '100vw';
+            alerta.style.height = '100vh';
+            alerta.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            alerta.style.display = 'flex';
+            alerta.style.justifyContent = 'center';
+            alerta.style.alignItems = 'center';
+            alerta.style.zIndex = '1000';
+
+            // Crear el cuadro de confirmación
+            const cuadro = document.createElement('div');
+            cuadro.style.backgroundColor = '#2f2f2f';
+            cuadro.style.padding = '20px';
+            cuadro.style.borderRadius = '10px';
+            cuadro.style.textAlign = 'center';
+            cuadro.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+
+            // Título
+            const titulo = document.createElement('h3');
+            titulo.innerText = 'Confirmar Eliminación';
+            titulo.style.marginBottom = '10px';
+
+            // Mensaje
+            const mensaje = document.createElement('p');
+            mensaje.innerText = '¿Estás seguro de que deseas eliminar esta cuenta?';
+
+            // Botón "Cancelar"
+            const btnCancelar = document.createElement('button');
+            btnCancelar.innerText = 'Cancelar';
+            btnCancelar.style.margin = '10px';
+            btnCancelar.style.padding = '10px 20px';
+            btnCancelar.style.backgroundColor = '#181818';
+            btnCancelar.style.border = 'none';
+            btnCancelar.style.borderRadius = '5px';
+            btnCancelar.style.cursor = 'pointer';
+            btnCancelar.onclick = () => {
+                document.body.removeChild(alerta);
+            };
+
+            // Botón "Confirmar"
+            const btnConfirmar = document.createElement('button');
+            btnConfirmar.innerText = 'Eliminar';
+            btnConfirmar.style.margin = '10px';
+            btnConfirmar.style.padding = '10px 20px';
+            btnConfirmar.style.backgroundColor = '#e74c3c';
+            btnConfirmar.style.color = '#fff';
+            btnConfirmar.style.border = 'none';
+            btnConfirmar.style.borderRadius = '5px';
+            btnConfirmar.style.cursor = 'pointer';
+            btnConfirmar.onclick = () => {
+                document.body.removeChild(alerta);
+                // Realizar el POST para eliminar
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/eliminar_cuenta/${cuentaId}`;
+                document.body.appendChild(form);
+                form.submit();
+            };
+
+            // Agregar elementos al cuadro
+            cuadro.appendChild(titulo);
+            cuadro.appendChild(mensaje);
+            cuadro.appendChild(btnCancelar);
+            cuadro.appendChild(btnConfirmar);
+
+            // Agregar el cuadro a la alerta y mostrarla
+            alerta.appendChild(cuadro);
+            document.body.appendChild(alerta);
+        }
+    </script>
+    
     {% endblock %}
 </body>
 </html>

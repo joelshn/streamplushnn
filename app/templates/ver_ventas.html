@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ventas</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    {% extends "base.html" %}
+    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+
+    {% block content %}
     <div class="header">
         <h1>Ventas</h1>
         <br>
@@ -20,80 +25,90 @@
             {% endif %}
         {% endwith %}
         <br>
-    </div>
     <form id="searchForm">
         <select id="filter">
-            <option value="referido">Buscar por Referido</option>
+            <option disabled="" selected="" value"">Buscar por</option>
+            <option value="id">Buscar por ID</option>
             <option value="referido">Buscar por Referido</option>
             <option value="cliente">Buscar por Cliente</option>
-            <option value="tipo_cuenta">Buscar por Tipo de Cuenta</option>
-            <!-- Agrega más opciones según los campos que quieras filtrar -->
+            <option value="tipocuenta">Buscar por Tipo de Cuenta</option>
+            <option value="idcorreo">Buscar por ID Correo</option>
+            
         </select>
         <input type="text" id="searchInput" placeholder="Buscar...">
-        <button type="button" onclick="filterTable()">Buscar</button>
+        <button type="button" class="btn btn-danger" onclick="filterTable()">Buscar</button>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
     </form>    
+ </div>
+<div class="table-container"></div>
     <table>
+        <thead>
         <tr>
             <th>ID</th>
             <th>Cliente</th>
-            <th>Tipo de Cuenta</th>
+            <th>Cuenta</th>
             <th>Cuenta Disponible</th>
             <th>Fecha de Activación</th>
             <th>Días</th>
             <th>Fecha de Expiración</th>
             <th>Monto</th>
-            <th>Inversión</th>
             <th>Ganancia</th>
             <th>Ganancia del Usuario</th>
             <th>Referido</th>
         </tr>
+    </thead>
+    <tbody>
         {% for venta in ventas %}
         <tr>
-            <td>{{ venta[0] }}</td>
-            <td>{{ venta[1] }}</td>
-            <td>{{ venta[2] }}</td>
-            <td>{{ venta[3] }}</td>
-            <td>{{ venta[4] }}</td>
-            <td>{{ venta[5] }}</td>
-            <td>{{ venta[6] }}</td>
-            <td>{{ venta[7] }}</td>
-            <td>{{ venta[8] }}</td>
-            <td>{{ venta[9] }}</td>
-            <td>{{ venta[12] }}</td>
-            <td>{{ venta[11] }}</td>
+            <td data-label="ID">{{ venta[0] }}</td>
+            <td data-label="Cliente">{{ venta[1] }}</td>
+            <td data-label="Cuenta">{{ venta[2] }}</td>
+            <td data-label="Cuenta Disponible">{{ venta[3] }}</td>
+            <td data-label="Activacion">{{ venta[4] }}</td>
+            <td data-label="Dias">{{ venta[5] }}</td>
+            <td data-label="Expira">{{ venta[6] }}</td>
+            <td data-label="Monto">{{ venta[7] }}</td>
+            <td data-label="Ganancia">{{ venta[9] }}</td>
+            <td data-label="Ganancia Usuario">{{ venta[12] }}</td>
+            <td data-label="Referido">{{ venta[11] }}</td>
         </tr>
         {% endfor %}
+    </tbody>
     </table>
-    <a class="btn btn-primary" href="{{ url_for('admin') }}">Volver</a>
     </div>
-</body>
-<script>
-    function filterTable() {
-        let filter = document.getElementById("filter").value;
-        let searchValue = document.getElementById("searchInput").value.toLowerCase();
-        let table = document.querySelector("table");
-        let rows = table.getElementsByTagName("tr");
-
-        for (let i = 1; i < rows.length; i++) { // Empieza desde 1 para saltar el encabezado
-            let cells = rows[i].getElementsByTagName("td");
-            let cellValue;
-            
-            if (filter === "referido") {
-                cellValue = cells[11].textContent || cells[11].innerText;
-            } else if (filter === "cliente") {
-                cellValue = cells[1].textContent || cells[1].innerText;
-            } else if (filter === "tipo_cuenta") {
-                cellValue = cells[2].textContent || cells[2].innerText;
-            }
-            // Agrega más condiciones para otros filtros
-
-            if (cellValue.toLowerCase().indexOf(searchValue) > -1) {
-                rows[i].style.display = "";
-            } else {
-                rows[i].style.display = "none";
+    <script>
+        function filterTable() {
+            let filter = document.getElementById("filter").value;
+            let searchValue = document.getElementById("searchInput").value.toLowerCase();
+            let table = document.querySelector("table");
+            let rows = table.getElementsByTagName("tr");
+    
+            for (let i = 1; i < rows.length; i++) { // Empieza desde 1 para saltar el encabezado
+                let cells = rows[i].getElementsByTagName("td");
+                let cellValue;
+                
+                if (filter === "referido") {
+                    cellValue = cells[10].textContent || cells[10].innerText;
+                } else if (filter === "cliente") {
+                    cellValue = cells[1].textContent || cells[1].innerText;
+                } else if (filter === "tipocuenta") {
+                    cellValue = cells[2].textContent || cells[2].innerText;
+                } else if (filter === "id") {
+                    cellValue = cells[0].textContent || cells[0].innerText;
+                } else if (filter === "idcorreo") {
+                    cellValue = cells[3].textContent || cells[3].innerText;
+                }
+                // Agrega más condiciones para otros filtros
+    
+                if (cellValue.toLowerCase().indexOf(searchValue) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
             }
         }
-    }
-</script>
+    </script>
+</body>
+{% endblock %}
 
 </html>

@@ -3,28 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio - Administracion de StreamPlus</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
+    <title>({{ notificaciones|length }}) StreamPlus</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Agregar Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Agregar FontAwesome para íconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     {% extends "base.html" %}
-    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
+    {% block title %}Inicio - Administración de StreamPlus{% endblock %}
 
     {% block content %}
 
-    <div class="header">
+    <div style="text-align: center;">
         <h2>Sesion: {{ session.username }}</h2>
-        <div></div>
         <!-- Notificaciones -->
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button style="background-color: rgb(221, 21, 21); max-width: 200px; border-radius: 50px; margin: 0 auto;" class="btn btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell"></i> Notificaciones <span class="badge badge-light">{{ notificaciones|length }}</span>
             </button>
-            <div class="dropdown-menu notificaciones-menu" aria-labelledby="dropdownMenuButton" style="background-color: black; color: white;">
+            <div class="dropdown-menu notificaciones-menu" aria-labelledby="dropdownMenuButton" style="background-color: rgb(49, 47, 47); color: white;">
                 {% if notificaciones %}
                     {% for notificacion in notificaciones %}
                         <li><a href="{{ notificacion.link }}">{{ notificacion.mensaje }}</a></li>
@@ -35,40 +31,62 @@
             </div>
         </div>
     </div>
-
-    <div class="main-content">
-        <div class="row">
-            <div class="col-md-6">
-                <ul class="option-list">
-                    <li><a href="{{ url_for('agregar_cuenta') }}">Nueva Cuenta</a></li>
-                    <li><a href="{{ url_for('agregar_cliente') }}">Nuevo Cliente</a></li>
-                    <li><a href="{{ url_for('agregar_venta') }}">Nueva Venta</a></li>
+    <br><br>
+                <ul class="option-list"> 
+                    <!-- Opción agrupada de "Nuevo" -->
+                    <li class="dropdown">
+                        <a 
+                            class="dropdown-toggle" 
+                            href="#" 
+                            id="nuevoDropdown" 
+                            role="button" 
+                            data-toggle="dropdown" 
+                            aria-haspopup="true" 
+                            aria-expanded="false">
+                            Nuevo
+                        </a>
+                        <div 
+                            class="dropdown-menu" 
+                            aria-labelledby="nuevoDropdown" 
+                            style="background-color: var(--surface-color); color: var(--text-color); border: 1px solid var(--input-border-color); border-radius: 4px;">
+                            <a 
+                                class="dropdown-item" 
+                                href="{{ url_for('agregar_cuenta') }}" 
+                                style="color: var(--text-color); padding: 10px 20px; display: block; text-decoration: none; background-color: var(--surface-color); transition: background-color 0.3s ease;">
+                                Nueva Cuenta
+                            </a>
+                            <a 
+                                class="dropdown-item" 
+                                href="{{ url_for('agregar_cliente') }}" 
+                                style="color: var(--text-color); padding: 10px 20px; display: block; text-decoration: none; background-color: var(--surface-color); transition: background-color 0.3s ease;">
+                                Nuevo Cliente
+                            </a>
+                            <a 
+                                class="dropdown-item" 
+                                href="{{ url_for('agregar_venta') }}" 
+                                style="color: var(--text-color); padding: 10px 20px; display: block; text-decoration: none; background-color: var(--surface-color); transition: background-color 0.3s ease;">
+                                Nueva Venta
+                            </a>
+                            <a 
+                                class="dropdown-item" 
+                                href="{{ url_for('agregar_ventas_multiples') }}" 
+                                style="color: var(--text-color); padding: 10px 20px; display: block; text-decoration: none; background-color: var(--surface-color); transition: background-color 0.3s ease;">
+                                Nueva Venta "Nuevo"
+                            </a>
+                        </div>
+                    </li>
                     <li><a href="{{ url_for('ver_ingresos') }}">Ingresos</a></li>
                     <li><a href="{{ url_for('ver_renovaciones') }}">Renovaciones</a></li>
+                    <li><a href="/pedidos_cliente">Pedidos de Clientes</a></li>
+                    <li><a href="{{ url_for('ver_pedidos') }}">Pedidos de Usuarios</a></li>
                     <li><a href="{{ url_for('estado') }}">Estado de Cuentas</a></li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <ul class="option-list">
                     <li><a href="{{ url_for('ver_cuentas') }}">Cuentas</a></li>
                     <li><a href="{{ url_for('ver_clientes') }}">Clientes</a></li>
                     <li><a href="{{ url_for('mostrar_usuarios') }}">Usuarios</a></li>
                     <li><a href="{{ url_for('ver_ventas') }}">Ventas</a></li>
-                    <li><a href="{{ url_for('ver_pedidos') }}">Pedidos</a></li>
                     <li><a href="{{ url_for('ver_retiros') }}">Solicitudes de Retiro</a></li>
+                    
                 </ul>
-            </div>
-        </div>
-    </div>
-    {% endblock %}
-</div>
-
-<!-- Agregar jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<!-- Agregar Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<!-- Agregar FontAwesome JS -->
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
-
 </body>
+{% endblock %}
 </html>

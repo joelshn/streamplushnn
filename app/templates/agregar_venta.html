@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Venta</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
     <h1>Agregar Venta</h1>
-    <form method="POST">
-        <label>ID: {{ next_id }}</label><br>
+    <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
+    </div>
+    <div class="container">
+    <form id="registro_form" method="POST">
+        <label>ID: {{ next_id }}</label>
         <label>Cliente:</label>
         <select name="cliente">
             <option disabled="" selected="" value"">Seleccione una opcion</option>
@@ -41,19 +54,13 @@
         <input type="number" name="monto" step="any" required><br>
         <label>Referido:</label>
         <input type="text" name="referido" id="referido" step="any" required><br>
-        <button type="submit">Guardar</button>
+        <button id="guardar" type="submit">Guardar</button>
+        <!-- Contenedor de la rueda de carga -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
     </form>
-        <br>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <br>
+    <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
 
     <script>
         $(document).ready(function() {
@@ -99,10 +106,23 @@
     </script>
 
 <script>
+    $(document).ready(function () {
+        $('#registro_form').submit(function (e) {
+            // Mostrar la rueda de carga y deshabilitar el botón
+            $('#loading').show();
+            $('#guardar').prop('disabled', true);
+
+            // Continuar con el envío del formulario
+            return true;
+        });
+    });
+</script>
+
+<script>
     document.getElementById('formulario').addEventListener('submit', function (event) {
         // Enlace directo del archivo
         const nextId = "{{ next_id }}"; // Valor pasado por Flask
-        const fileLink = `https://127.0.0.1:8080/factura/${nextId}`; // Cambia por tu enlace real
+        const fileLink = `/factura/${nextId}`; // Cambia por tu enlace real
 
         // Permitir el envío del formulario
         const form = this;
@@ -119,6 +139,5 @@
         }, 500); // Ajusta el tiempo según sea necesario para permitir el envío
     });
 </script>
-        <button class="btn btn-primary"><a href="/admin">Volver</a></button>
 </body>
 </html>

@@ -4,22 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Cliente</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    {% extends "base.html" %}
-    {% block title %}Inicio - Administracion de StreamPlus{% endblock %}
-
-    {% block content %}
+    <div class="container">
     <h1>Registrar Cliente</h1>
-    <form method="POST">
-        <label>ID: {{ next_id }}</label><br>
-        <label>Nombre:</label>
-        <input type="text" name="nombre" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+ [A-Za-zÀ-ÖØ-öø-ÿ]+$" title="Debe incluir nombre y apellido" placeholder="Juan Pérez" required><br>
-        <label>Número:</label>
-        <input type="text" name="numero" pattern="\d{8}" maxlength="8" title="El numero debe contener 8 dígitos" placeholder="97302756" required><br>
-        <button type="submit">Guardar</button>
-    </form>
     <br>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -31,7 +22,64 @@
         {% endif %}
     {% endwith %}
     <br>
-    <a class="btn btn-primary" href="{{ url_for('streamplus') }}">Volver</a>
-    {% endblock %}
+    <form id="registro_form" method="POST">
+        <label>ID: {{ next_id }}</label><br>
+        <label>Nombre:</label>
+        <input type="text" name="nombre"  placeholder="Juan Pérez" required><br>
+        <label>Número:</label>
+        <input type="text" id="numero" name="numero" title="El número debe contener 8 dígitos" required oninput="formatearNumero()" />
+        <label>Activaciones:</label>
+        <input type="text" name="activacion" required><br>
+        <button type="submit" id="guardar_cliente">Guardar</button>
+    </form>
+    
+    <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+
+
+    <!-- Contenedor de la rueda de carga -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+</div>
+<script>
+    function formatearNumero() {
+        const input = document.getElementById('numero');
+        let numero = input.value;
+
+        // Elimina cualquier cosa que no sea dígito o signo de más (para el código de país)
+        numero = numero.replace(/[^\d+]/g, '');
+
+        // Si empieza con el símbolo de "+" (código de país), elimínalo
+        if (numero.startsWith('+')) {
+            numero = numero.slice(1);  // Elimina el signo "+"
+        }
+
+        // Elimina cualquier código de país (si tiene más de 8 dígitos, solo toma los últimos 8)
+        if (numero.length > 8) {
+            numero = numero.slice(-8);  // Mantiene solo los últimos 8 dígitos
+        }
+
+        // Si el número tiene más de 4 dígitos, agrega un guion después del 4to dígito
+        if (numero.length > 4) {
+            numero = numero.slice(0, 4) + '-' + numero.slice(4, 8);
+        }
+
+        // Asigna el número formateado al campo de entrada
+        input.value = numero;
+    }
+</script>
+
+    <script>
+        $(document).ready(function () {
+            $('#registro_form').submit(function (e) {
+                // Mostrar la rueda de carga y deshabilitar el botón
+                $('#loading').show();
+                $('#guardar_cliente').prop('disabled', true);
+
+                // Continuar con el envío del formulario
+                return true;
+            });
+        });
+    </script>
 </body>
 </html>

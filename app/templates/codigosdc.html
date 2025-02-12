@@ -3,23 +3,18 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Último Correo</title>
+        <title>Correo</title>
+        <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     </head>
     <body>
-        <h1>Último Correo</h1>
-        {% if email_data %}
-        <div class="email-container">
-            <div class="email-header">
-                <p><strong>Remitente:</strong> {{ email_data.sender }}</p>
-                <p><strong>Asunto:</strong> {{ email_data.subject }}</p>
-                <p><strong>Fecha:</strong> {{ email_data.date }}</p>
-            </div>
-           
-                {{ email_data.body | safe }}
-            </div>
+        <div class="email-header">
+            <h1><a style="text-align: center;">Correo</a></h1><br>
+            <button onclick="location.href='/'" class="btn btn-primary">Volver</button>
+            <p><strong>De: </strong> {{email_data['from']}}</p>
+            <p><strong>Asunto: </strong> {{email_data['subject']}}</p>
         </div>
-        {% else %}
-        <p>No se encontró ningún correo.</p>
-        {% endif %}
+        <div class="email-body">
+            {{ email_data['content'] | safe }}
+        </div>
     </body>
     </html>

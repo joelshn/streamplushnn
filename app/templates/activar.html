@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar Cuenta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+    <h1>Activar Cuenta</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <br>
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+                <br>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="aviso">  
+      ⚠️ La <strong class="importante">ID de Activación</strong> se encuentra en la factura que te enviamos.  
+      Asegúrate de ingresarlo correctamente antes de continuar.
+  </div>
+    
+    <form id="registro_form" method="POST" action="{{ url_for('activar') }}">
+        <label for="id">ID de Activación:</label>
+        <input type="number" name="id" required><br>
+        <label for="telefono">Número de Teléfono:</label>
+        <input type="text" id="telefono" name="telefono" title="El número debe contener 8 dígitos" required oninput="formatearNumero()" />
+
+        <label for="dispositivo">Dispositivo:</label>
+        <select name="dispositivo" required>
+            <option disabled selected value="">Seleccione una opcion</option>
+            <option value="Celular">Celular o Computadora</option>
+            <option value="TV">TV</option>
+        </select><br>
+        <button id="guardar" type="submit">Activar</button>
+    </form>
+    <!-- Mover la rueda de carga FUERA del formulario -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Procesando...</p>
+</div>
+    </div>
+    <script>
+      $(document).ready(function () {
+          $('#registro_form').submit(function (e) {
+              $('#loading').show(); // Mostrar la rueda de carga
+              $('#guardar').prop('disabled', true); // Deshabilitar el botón
+  
+              // Evita que se envíe el formulario de inmediato en pruebas
+              // e.preventDefault(); // **Solo usar si quieres probar la rueda de carga**
+          });
+      });
+  </script>
+  <script>
+    function formatearNumero() {
+        const input = document.getElementById('telefono');
+        let numero = input.value;
+
+        // Elimina cualquier cosa que no sea dígito o signo de más (para el código de país)
+        numero = numero.replace(/[^\d+]/g, '');
+
+        // Si empieza con el símbolo de "+" (código de país), elimínalo
+        if (numero.startsWith('+')) {
+            numero = numero.slice(1);  // Elimina el signo "+"
+        }
+
+        // Elimina cualquier código de país (si tiene más de 8 dígitos, solo toma los últimos 8)
+        if (numero.length > 8) {
+            numero = numero.slice(-8);  // Mantiene solo los últimos 8 dígitos
+        }
+
+        // Si el número tiene más de 4 dígitos, agrega un guion después del 4to dígito
+        if (numero.length > 4) {
+            numero = numero.slice(0, 4) + '-' + numero.slice(4, 8);
+        }
+
+        // Asigna el número formateado al campo de entrada
+        input.value = numero;
+    }
+</script>
+</body>
+</html>

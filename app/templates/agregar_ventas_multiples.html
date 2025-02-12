@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agregar Ventas para un Cliente</title>
+    <title>Agregar Venta</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Agregar Ventas para un Cliente</h1>
+        <h1>Agregar Venta</h1>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <br>
         <form id="ventas_form">
             <label>Cliente:</label>
             <select name="cliente" id="cliente" required>
                 <option disabled selected value="">Seleccione un cliente</option>
                 {% for cliente in clientes %}
-                <option value="{{ cliente[0] }}-{{ cliente[1]}}">{{ cliente[0] }}_{{ cliente[1] }} ({{ cliente[2] }})</option>
+                <option value="{{ cliente[0] }} {{ cliente[1] }}">{{ cliente[0] }} {{ cliente[1] }} ({{ cliente[2] }})</option>
                 {% endfor %}
             </select><br><br>
             
@@ -23,6 +35,8 @@
                 <!-- Primera fila de venta -->
                 <div class="venta">
                     <h3>Cuenta 1</h3>
+                    <label>ID:</label>
+                    <input type="number" name="ventas[0][id]" class="id" value="{{ next_id }}" readonly><br>
                     <label>Tipo de Cuenta:</label>
                     <select name="ventas[0][tipo_cuenta]" class="tipo_cuenta">
                         <option disabled selected value="">Seleccione una opción</option>
@@ -46,22 +60,31 @@
                 </div>
             </div>
             <button type="button" id="add_venta">Agregar Otra Cuenta</button>
-            <button type="submit">Guardar Ventas</button>
+            <button type="submit" id="guardar_ventas">Guardar Ventas</button>
         </form>
         <br>
-        <button class="btn btn-primary"><a href="/admin">Volver</a></button>
+        <button style="text-decoration: none;" class="btn btn-primary"><a href="/admin">Volver</a></button>
+    </div>
+
+    <!-- Contenedor de la rueda de carga -->
+    <div id="loading">
+        <div class="spinner"></div>
     </div>
 
     <script>
         $(document).ready(function () {
             let ventaIndex = 0;
-    
+            let ventaId= {{ next_id | default(0) }};
+
             // Añadir una nueva fila de venta
             $('#add_venta').click(function () {
                 ventaIndex++;
+                ventaId++;
                 $('#ventas_container').append(`
                     <div class="venta">
                         <h3>Cuenta ${ventaIndex + 1}</h3>
+                        <label>ID:</label><br>
+                        <input type="number" name="vventas[${ventaId}" class="id" value="${ventaId}" readonly><br>
                         <label>Tipo de Cuenta:</label>
                         <select name="ventas[${ventaIndex}][tipo_cuenta]" class="tipo_cuenta">
                             <option disabled selected value="">Seleccione una opción</option>
@@ -85,7 +108,7 @@
                     </div>
                 `);
             });
-    
+
             // Manejar cambios en tipo de cuenta para cargar cuentas disponibles
             $(document).on('change', '.tipo_cuenta', function () {
                 const tipoCuenta = $(this).val();
@@ -105,34 +128,43 @@
                     }
                 });
             });
-    
+
             // Enviar todas las ventas como JSON
             $('#ventas_form').submit(function (e) {
                 e.preventDefault();
-    
+
+                // Mostrar la rueda de carga y deshabilitar el botón
+                $('#loading').show();
+                $('#guardar_ventas').prop('disabled', true);
+
                 // Obtener el cliente
                 const cliente = $('#cliente').val();
                 if (!cliente) {
                     alert('Por favor, selecciona un cliente.');
+                    $('#loading').hide();
+                    $('#guardar_ventas').prop('disabled', false);
                     return;
                 }
-    
+
                 // Serializar las ventas
                 const ventas = [];
                 $('#ventas_container .venta').each(function () {
+                    const ventaId = $(this).find('.id').val();
                     const tipoCuenta = $(this).find('.tipo_cuenta').val();
                     const cuentaDisponible = $(this).find('.cuenta_disponible').val();
                     const fechaIni = $(this).find('.fechaini').val();
                     const dias = $(this).find('.dias').val();
                     const monto = $(this).find('input[name$="[monto]"]').val();
-    
-                    // Verificar que los campos estén completos
+
                     if (!tipoCuenta || !cuentaDisponible || !fechaIni || !dias || !monto) {
                         alert('Por favor, completa todos los campos en cada venta.');
+                        $('#loading').hide();
+                        $('#guardar_ventas').prop('disabled', false);
                         return false;
                     }
-    
+
                     ventas.push({
+                        id: ventaId,
                         tipo_cuenta: tipoCuenta,
                         cuenta_disponible: cuentaDisponible,
                         fechaini: fechaIni,
@@ -140,7 +172,7 @@
                         monto: monto,
                     });
                 });
-    
+
                 // Enviar los datos al backend
                 $.ajax({
                     url: "{{ url_for('agregar_ventas_multiples') }}",
@@ -148,10 +180,25 @@
                     contentType: 'application/json',
                     data: JSON.stringify({ cliente, ventas }),
                     success: function (response) {
+                        $('#loading').hide();
+                        $('#guardar_ventas').prop('disabled', false);
                         alert(response.message);
-                        window.location.href = response.factura_url;  // Redirige a la factura generada
+
+                        // Descargar la factura
+                        const facturaUrl = response.factura_url;
+                        const a = document.createElement('a');
+                        a.href = facturaUrl;
+                        a.download = ''; // Nombre del archivo opcional
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        // Recargar la página
+                        location.reload();
                     },
                     error: function (xhr) {
+                        $('#loading').hide();
+                        $('#guardar_ventas').prop('disabled', false);
                         const error = xhr.responseJSON ? xhr.responseJSON.error : 'Error desconocido';
                         alert(`Error: ${error}`);
                     }
@@ -159,6 +206,5 @@
             });
         });
     </script>
-    
 </body>
 </html>

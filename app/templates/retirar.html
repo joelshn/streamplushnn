@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retirar Dinero - StreamPlus</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
@@ -18,7 +19,7 @@
 </head>
 <body>
 <div class="container">
-    <a class="btn btn-primary" href="/streamplus">Volver</a>
+    <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
     <h5 class="card-title">Saldo: L {{ saldo }}</h5>
     <h2>Retirar Dinero</h2>
     <form id="retiroForm" action="{{ url_for('retirar_dinero') }}" method="POST">

@@ -3,185 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamplus</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <title>StreamPlus</title>
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        .header {
-            display: flex;
-            align-items: center; /* Alinea verticalmente el contenido */
-        }
-        .header img {
-            margin-right: 15px; /* Espaciado entre la imagen y el texto */
-        }
-        .header h1 {
-            margin: 0; /* Elimina margen adicional */
-            font-size: 2em;
-        }
-    </style>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #ecf0f1;
-            --accent-color: #e74c3c;
-            --text-color: #34495e;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
         body {
+            background: url('https://static.vecteezy.com/system/resources/previews/010/825/735/non_2x/dark-background-random-minimalist-abstract-illustration-for-logo-card-banner-web-and-printing-free-vector.jpg') no-repeat center center fixed;
+            background-size: cover;
             font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            overflow-x: hidden;
-        }
-        header {
-            background-color: var(--primary-color);
-            color: var(--secondary-color);
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
+            margin: 0;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0px;
         }
-        
-        h1 {
+
+        header {
+            background: linear-gradient(135deg, #2b2b2b 0%, #3d3d3d 40%, #1a1a1a 100%);
+
+            color: #fff;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0px;
+            top: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 img {
+            margin-right: 5px; /* Espacio entre el logo y el texto */
+        }
+
+        header h1 {
             font-size: 1.5rem;
             margin: 0;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .cart-icon {
-            position: relative;
+            position: fixed; /* Fijo para que permanezca visible */
+            top: 10px; /* Separación desde la parte superior */
+            right: 10px; /* Separación desde la derecha */
+            font-size: 2rem; /* Tamaño del ícono */
+            z-index: 1000; /* Asegura que esté por encima del resto */
+            background-color: #2c3e50; /* Fondo del carrito */
+            color: #fff; /* Color del ícono */
+            padding: 10px; /* Espaciado interno */
+            border-radius: 50%; /* Forma circular */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
             cursor: pointer;
-            font-size: 1.5rem;
+            transition: transform 0.3s ease;
         }
+        .cart-icon:hover {
+            transform: scale(1.1); /* Efecto de hover */
+        }
+
         .cart-count {
             position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: var(--accent-color);
-            color: var(--secondary-color);
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: #fff;
             border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 2px solid #fff;
         }
+
+        /* Ajustes en dispositivos pequeños */
+        @media (max-width: 768px) {
+            .cart-icon {
+            font-size: 1.8rem; /* Ajustar tamaño para pantallas pequeñas */
+            padding: 8px;
+            right: 5px; /* Más cerca del borde en móviles */
+            }
+
+            .cart-count {
+                font-size: 0.7rem; /* Reducir tamaño del contador */
+            }
+        }
+
+
         main {
-            padding: 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
+            padding: 2rem;
         }
+
         .products {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-        .product {
-            background-color: #463d3d;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .product:hover {
-            transform: translateY(-5px);
-        }
-        .product img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .product-info {
-            padding: 1rem;
-        }
-        .product h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
-        }
-        .cart {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            left: 10px;
-            background-color: #463d3d;
-            border-radius: 8px;
-            padding: 1rem;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: none;
-            z-index: 1000;
-        }
-        .cart-items {
-            margin-bottom: 1rem;
-        }
-        .cart-item {
-            color:#fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #4d4747;
-        }
-        .cart-total {
-            font-weight: bold;
-            text-align: right;
-            margin-bottom: 1rem;
-        }
-        button {
-            background-color: var(--primary-color);
-            color: var(--secondary-color);
-            border: none;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-        button:hover {
-            background-color: var(--accent-color);
-        }
-        .remove-item {
-            background-color: transparent;
-            color: var(--accent-color);
-            padding: 0;
-            font-size: 1.2rem;
-            width: auto;
-        }
-        .remove-item:hover {
-            color: var(--primary-color);
-            background-color: transparent;
+            gap: 2rem;
         }
 
-        @media (min-width: 768px) {
-            h1 {
-                font-size: 2rem;
+        .product {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .product img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .product-info {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .product h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+            margin: 0 0 0.5rem;
+        }
+
+        .product p {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 0 1rem;
+        }
+
+        button {
+            background-color: #2c3e50;
+            color: #fff;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
             }
-            main {
-                padding: 2rem;
-            }
+
             .products {
-                gap: 2rem;
-            }
-            .cart {
-                right: 20px;
-                left: auto;
-                width: 300px;
-            }
-            button {
-                width: auto;
+                grid-template-columns: 1fr;
             }
         }
-    </style>
-    <style>
+
         nav ul {
             list-style: none;
             padding: 0;
@@ -198,19 +180,21 @@
         nav ul li a {
             color: #fff;
             text-decoration: none;
+            font-size: 1.5rem;
         }
 
         nav ul li ul {
             display: none;
             position: absolute;
             top: 100%;
-            left: 0;
-            background-color: #444;
+            background: linear-gradient(135deg, #2b2b2b 0%, #3d3d3d 40%, #1a1a1a 100%);
             list-style: none;
             padding: 0;
             margin: 0;
             width: 200px;
             z-index: 1000;
+            left: 50%; /* Posiciona el menú en el centro del elemento padre */
+            transform: translateX(-50%);
         }
 
         nav ul li ul li {
@@ -224,7 +208,7 @@
         }
 
         nav ul li ul li a:hover {
-            background-color: #555;
+            background-color: #110f64;
         }
 
         nav ul li:hover > ul {
@@ -234,172 +218,190 @@
         nav ul li {
             margin: 0.5em 0;
         }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 0;
+        }
+
+        .search-container input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            width: 100px;
+            margin: 0;
+        }
+
+        .search-container button {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #4a00e0, #8e2de2, #6a11cb);;
+            color: #fff;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0;
+            width: 100px;
+        }
+
+        .search-container button:hover {
+            background-color: #270a6b;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 30px;
+            fill: white;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
     <header>
-        <div class="header">
-            
-            <h1>StreamPlus</h1>
-        </div>
-            <nav>
-                <ul>
-                    <li>
-                        <a href="#">Menu</a>
-                        <ul class="submenu">
-                            <li><a href="/streamplus">Iniciar Sesion</a></li>
-                            <li><a href="/codigos">Codigos de acceso</a></li>
-                            <li><a href="/">Cuentas</a></li>
-                            <li><a href="/combos">Combos</a></li>
-                            <li><a href="/metodos_pago">Métodos de Pago</a></li>
-                            <li><a href="https://Wa.me/50497302756">Soporte</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        <div class="cart-icon" onclick="toggleCart()">
+        <h1>
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png" alt="StreamPlus" class="logo" height="50" width="50">
+        Streamplus
+        </h1>
+        <nav>
+            <ul>
+                <li>
+                    <a href="#" aria-label="Abrir menú">
+                        <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="/activar">Activar Cuenta</a></li>
+                        <li><a href="/streamplus">Iniciar Sesion</a></li>
+                        <li><a href="/register">Vender</a></li>
+                        <li><a href="https://Wa.me/50497302756">Soporte</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="cart-icon" onclick="redirectToCart()">
             <i class="fas fa-shopping-cart"></i>
             <span class="cart-count" id="cart-count">0</span>
         </div>
+        
     </header>
+    <br>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar cuentas...">
+        <button onclick="searchProducts()">Buscar</button>
+    </div>
     <main>
-        <section class="products">
-            <div class="product">
-                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 1">
-                <div class="product-info">
-                    <h2>Pantalla Netflix</h2>
-                    <p>1 Mes</p>
-                    <p>Precio: L 100</p>
-                    <button onclick="addToCart('Pantalla Netflix 1 Mes', 100)">Agregar al carrito</button>
-                </div>
-            </div>
-            <div class="product">
-                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 2">
-                <div class="product-info">
-                    <h2>Pantalla Netflix</h2>
-                    <p>2 Meses</p>
-                    <p>Precio: L 200</p>
-                    <button onclick="addToCart('Pantalla Netflix 2 Meses', 200)">Agregar al carrito</button>
-                </div>
-            </div>
-            <div class="product">
-                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 3">
-                <div class="product-info">
-                    <h2>Pantalla Netflix</h2>
-                    <p>3 Meses</p>
-                    <p>Precio: L 300</p>
-                    <button onclick="addToCart('Pantalla Netflix 3 Meses', 300)">Agregar al carrito</button>
-                </div>
-            <br>
-            <div class="product">
-                <img src="https://i.ytimg.com/vi/ZMak63mHq5Y/maxresdefault.jpg" alt="Producto 3">
-                <div class="product-info">
-                    <h2>Pantalla Disney</h2>
-                    <p>3 Meses</p>
-                    <p>Precio: L 80</p>
-                    <button onclick="addToCart('Pantalla Netflix 3 Meses', 300)">Agregar al carrito</button>
-                </div>
-            </div>
+        <section class="products" id="product-list">
+            <!-- Los productos se generarán dinámicamente -->
         </section>
     </main>
-    <section class="cart" id="cart">
-        <h2>Tu Carrito</h2>
-        <div class="cart-items" id="cart-items"></div>
-        <div class="cart-total" id="cart-total"></div>
-        <div id="smart-button-container">
-            <div style="text-align: center;">
-                <div id="paypal-button-container"></div>
-            </div>
-        </div>
-    </section>
-    <script src="https://www.paypal.com/sdk/js?client-id=AWLfQ1gBp_3g86tjMwq4uTt5sssQvX5MTeQJhBv490r1j9TopgVV20c9JWWa_4KVzdWiZTr753g-z_0v&currency=USD"></script>
+
     <script>
         let cart = [];
-        let total = 0;
-        let paypalButtonRendered = false;
+        const products = [
+            { id: 1, name: "Pantalla Netflix 1 Mes", price: 100, image: "https://static2.pisapapeles.net/uploads/2023/06/netflix-title_1.jpg" },
+            { id: 2, name: "Pantalla Netflix 2 Meses", price: 200, image: "https://static2.pisapapeles.net/uploads/2023/06/netflix-title_1.jpg" },
+            { id: 3, name: "Pantalla Netflix 3 Meses", price: 300, image: "https://static2.pisapapeles.net/uploads/2023/06/netflix-title_1.jpg" },
+            { id: 4, name: "Pantalla Disney 1 Mes", price: 80, image: "https://larepublica.cronosmedia.glr.pe/original/2024/05/22/664eaeaca5c3d8621647b443.jpg" },
+            { id: 5, name: "Pantalla Disney 2 Meses", price: 160, image: "https://larepublica.cronosmedia.glr.pe/original/2024/05/22/664eaeaca5c3d8621647b443.jpg" },
+            { id: 6, name: "Pantalla Disney 3 Meses", price: 240, image: "https://larepublica.cronosmedia.glr.pe/original/2024/05/22/664eaeaca5c3d8621647b443.jpg" },
+            { id: 7, name: "Spotify Premium 1 Mes", price: 80, image: "https://opgelicht.assets.avrotros.nl/user_upload_2020/Spotify-betaalgegevens-kopfoto.jpg" },
+            { id: 8, name: "Spotify Premium 2 Meses", price: 160, image: "https://opgelicht.assets.avrotros.nl/user_upload_2020/Spotify-betaalgegevens-kopfoto.jpg" },
+            { id: 9, name: "Spotify Premium 3 Meses", price: 240, image: "https://opgelicht.assets.avrotros.nl/user_upload_2020/Spotify-betaalgegevens-kopfoto.jpg" },
+            { id: 10, name: "Pantalla Crunchyroll 1 Mes", price: 70, image: "https://tec.com.pe/wp-content/uploads/2022/03/IA-Crunchyroll.jpg" },
+            { id: 11, name: "Pantalla Crunchyroll 2 Meses", price: 140, image: "https://tec.com.pe/wp-content/uploads/2022/03/IA-Crunchyroll.jpg" },
+            { id: 12, name: "Pantalla Crunchyroll 3 Meses", price: 210, image: "https://tec.com.pe/wp-content/uploads/2022/03/IA-Crunchyroll.jpg" },
+            { id: 13, name: "Pantalla Primevideo 1 Mes", price: 80, image: "https://lh4.googleusercontent.com/proxy/JZCLGPxnPct-1r8WMMvJiVe7pjX6-B3bsp7lJFuiGBamJ2UcgjDVkUjYcOjOWYmfpXhzt3J-7nzevTNgHsAjhJpBFSVB9lfmEpRtqq3hUYQAjthmowp8ijkC" },
+            { id: 14, name: "Pantalla Primevideo 2 Meses", price: 160, image: "https://lh4.googleusercontent.com/proxy/JZCLGPxnPct-1r8WMMvJiVe7pjX6-B3bsp7lJFuiGBamJ2UcgjDVkUjYcOjOWYmfpXhzt3J-7nzevTNgHsAjhJpBFSVB9lfmEpRtqq3hUYQAjthmowp8ijkC" },
+            { id: 15, name: "Pantalla Primevideo 3 Meses", price: 240, image: "https://lh4.googleusercontent.com/proxy/JZCLGPxnPct-1r8WMMvJiVe7pjX6-B3bsp7lJFuiGBamJ2UcgjDVkUjYcOjOWYmfpXhzt3J-7nzevTNgHsAjhJpBFSVB9lfmEpRtqq3hUYQAjthmowp8ijkC" },
+            { id: 16, name: "Pantalla Max 1 Mes", price: 80, image: "https://www.tecnogus.com.co/wp-content/uploads/2024/06/MAX.jpeg" },
+            { id: 17, name: "Pantalla Max 2 Meses", price: 160, image: "https://www.tecnogus.com.co/wp-content/uploads/2024/06/MAX.jpeg" },
+            { id: 18, name: "Pantalla Max 3 Meses", price: 240, image: "https://www.tecnogus.com.co/wp-content/uploads/2024/06/MAX.jpeg" },
+            { id: 19, name: "Youtube Premium 1 Mes", price: 100, image: "https://i.pcmag.com/imagery/articles/05UEZRQxihApFncoXFwT5K3-1.fit_lim.v1719577897.jpg" },
+            { id: 20, name: "Youtube Premium 2 Meses", price: 200, image: "https://i.pcmag.com/imagery/articles/05UEZRQxihApFncoXFwT5K3-1.fit_lim.v1719577897.jpg" },
+            { id: 21, name: "Youtube Premium 3 Meses", price: 300, image: "https://i.pcmag.com/imagery/articles/05UEZRQxihApFncoXFwT5K3-1.fit_lim.v1719577897.jpg" },
+        ];
 
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCart();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
-        }
-
-        function updateCart() {
-            const cartItems = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-            const cartCount = document.getElementById('cart-count');
-            cartItems.innerHTML = '';
-            total = 0;
-
-            cart.forEach((item, index) => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'cart-item';
-                itemElement.innerHTML = `
-                    <span>${item.name} - $${item.price.toFixed(2)}</span>
-                    <button class="remove-item" onclick="removeFromCart(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>
+        function renderProducts() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+            products.forEach(product => {
+                const productElement = `
+                    <div class="product">
+                        <img src="${product.image}" alt="${product.name}">
+                        <div class="product-info">
+                            <h2>${product.name}</h2>
+                            <p>Precio: L ${product.price.toFixed(2)}</p>
+                            <button onclick="addToCart(${product.id})">Agregar al carrito</button>
+                        </div>
+                    </div>
                 `;
-                cartItems.appendChild(itemElement);
-                total += item.price;
+                productList.innerHTML += productElement;
             });
+        }
 
-            cartTotal.textContent = `Total: L${total.toFixed(2)}`;
-            cartCount.textContent = cart.length;
-            
-            if (!paypalButtonRendered && cart.length > 0) {
-                initPayPalButton();
-                paypalButtonRendered = true;
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                cart.push(product);
+                updateCartCount();
             }
         }
 
-        function toggleCart() {
-            const cartElement = document.getElementById('cart');
-            cartElement.style.display = cartElement.style.display === 'none' ? 'block' : 'none';
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            cartCount.textContent = cart.length;
         }
 
-        function initPayPalButton() {
-            paypal.Buttons({
-                style: {
-                    shape: 'rect',
-                    color: 'gold',
-                    layout: 'vertical',
-                    label: 'pay',
-                },
-
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            description: "Compra en Boutique Elegante",
-                            amount: {
-                                currency_code: "USD",
-                                value: total.toFixed(2)
-                            }
-                        }]
-                    });
-                },
-
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(orderData) {
-                        console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                        alert('¡Compra realizada con éxito!');
-                        cart = [];
-                        updateCart();
-                        toggleCart();
-                    });
-                },
-
-                onError: function(err) {
-                    console.log(err);
-                }
-            }).render('#paypal-button-container');
+        function redirectToCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            window.location.href = 'cart';
         }
 
-        updateCart();
+        renderProducts();
     </script>
+
+<script>
+    function renderProducts(filteredProducts = products) {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';
+        
+        if (filteredProducts.length === 0) {
+            productList.innerHTML = '<p style="color: white; text-align: center;">No se encontraron productos.</p>';
+            return;
+        }
+        
+        filteredProducts.forEach(product => {
+            const productElement = `
+                <div class="product">
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-info">
+                        <h2>${product.name}</h2>
+                        <p>Precio: L ${product.price}</p>
+                        <button onclick="addToCart(${product.id})">Agregar al carrito</button>
+                    </div>
+                </div>
+            `;
+            productList.innerHTML += productElement;
+        });
+    }
+
+    function searchProducts() {
+        const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+        const filteredProducts = products.filter(product => 
+            product.name.toLowerCase().includes(searchInput)
+        );
+        renderProducts(filteredProducts);
+    }
+
+    // Render inicial de productos
+    renderProducts();
+</script>
+
+
 </body>
 </html>

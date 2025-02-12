@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4UQc4Q8iEBI4Oq9wFrfmjfWnSc4vOvN5NADSZKi9fV5Nsrtg3pfi-m1diPP3qD4FLsdreMzAHKSrxvVgkRKXQRUmrtdd5ta6Lc5HUqw7R81TJnKDlB_aSEhjfPC10a72KFtDeBGoOMYu5kH50EcdQHG7U9BsTUQ-jw0I1VFbVQyf_gx_1DYYfecWpCVM/s500/Plus-removebg-preview.png">
+    <title>Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://static.vecteezy.com/system/resources/previews/010/825/735/non_2x/dark-background-random-minimalist-abstract-illustration-for-logo-card-banner-web-and-printing-free-vector.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            padding: 1rem;
+        }
+
+        .order {
+            background-color: #fff;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pedidos</h1>
+        <button onclick="location.href='admin'" class="btn btn-primary">Volver</button>
+    </header>
+    <main id="order-list">
+        <!-- Los pedidos se generarán dinámicamente -->
+    </main>
+    <script>
+        function renderOrders() {
+            fetch('orders.json')
+                .then(response => response.json())
+                .then(orders => {
+                    const orderList = document.getElementById('order-list');
+                    orderList.innerHTML = '';
+                    orders.forEach(order => {
+                        orderList.innerHTML += `
+                            <div class="order">
+                                <p><strong>ID:</strong> ${order.id}</p>
+                                <p><strong>Cliente:</strong> ${order.name}</p>
+                                <p><strong>Teléfono:</strong> ${order.phone}</p>
+                                <p><strong>Referido:</strong> ${order.referral || 'Ninguno'}</p>
+                                <p><strong>Productos:</strong> ${order.cart.map(item => item.name).join(', ')}</p>
+                                <p><strong>Total:</strong> ${order.total}</p>
+                                <button onclick="deleteOrder(${order.id})">Eliminar Pedido</button>
+                            </div>
+                        `;
+                    });
+                });
+        }
+
+        function deleteOrder(id) {
+            fetch('delete_order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            }).then(renderOrders);
+        }
+
+        renderOrders();
+    </script>
+</body>
+</html>
